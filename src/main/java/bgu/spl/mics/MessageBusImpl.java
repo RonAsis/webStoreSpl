@@ -36,7 +36,7 @@ public class MessageBusImpl implements MessageBus {
     private Hashtable<MicroService, Vector<Message>> fQueuesMicroService;// can find in this field all the queues of the micro-service according to the name of them
     private Hashtable<Class<? extends Event>,RoundrobinPattern> fMessagesEvent;
     private Hashtable<Class<? extends Broadcast>,Vector< MicroService >> fMessageBroadcast;
-    private Hashtable<Class<? extends Event>,Future> FutureOfEvents;
+    private Hashtable<Class<? extends Event>,Future> fFutureOfEvents;
 
     /**for Safe Singleton of this class**/
 	private static class SingletonHolder {
@@ -58,7 +58,9 @@ public class MessageBusImpl implements MessageBus {
      * @param m    The subscribing micro-service.
      * @param <T>
      */
+    //@PRE
 	@Override
+    //@PRE
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		// TODO Auto-generated method stub
         subscribeToVectorEvent(isEventExist(type),m);
@@ -109,7 +111,8 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> void complete(Event<T> e, T result) {
 		// TODO Auto-generated method stub
-        FutureOfEvents.get(e).resolve(result);
+        fFutureOfEvents.get(e).resolve(result);
+
 	}
 
     /**
@@ -148,7 +151,7 @@ public class MessageBusImpl implements MessageBus {
 		// TODO Auto-generated method stub
         if(subScribEventToQuene(e)){
             createFutrueEvent( e);
-            return FutureOfEvents.get(e.getClass());
+            return fFutureOfEvents.get(e.getClass());
         }
         return null;
 	}
@@ -161,7 +164,7 @@ public class MessageBusImpl implements MessageBus {
         return false;
     }
     private <T> void createFutrueEvent(Event<T> e){
-        FutureOfEvents.put(e.getClass(),new Future());
+        fFutureOfEvents.put(e.getClass(),new Future());
     }
 
     /**
@@ -207,7 +210,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
 		// TODO Auto-generated method stub
-        blockingAwaitMessage(m);
+       // blockingAwaitMessage(m);
         return fQueuesMicroService.get(m).get(0);
 	}
 	private void blockingAwaitMessage(MicroService m){
