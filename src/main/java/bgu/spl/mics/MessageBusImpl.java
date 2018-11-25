@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Queue;
 import java.util.Vector;
 
 /**
@@ -9,43 +10,20 @@ import java.util.Vector;
  * Only private fields and methods can be added to this class.
  */
 public class MessageBusImpl implements MessageBus {
-	private class RoundrobinPattern{
-	    private int count;
-	    private Vector<MicroService > fVectorEvents;
-	    private RoundrobinPattern(){
-            count=0;
-            fVectorEvents=new  Vector<MicroService >();
-        }
-        private MicroService getNext(){
-	        int size =fVectorEvents.size();
-	        MicroService ans= fVectorEvents.get(count-1);
-            count=(count+1)%size;
-            return ans;
-        }
-        private void addToVector(MicroService m){
-            fVectorEvents.add(m);
-        }
-        private void removeFromVector (MicroService m ){
-	        count--;
-            fVectorEvents.remove(m);
-        }
-        private boolean contain (MicroService m){
-	        return fVectorEvents.contains(m);
-        }
-    }
-    private Hashtable<MicroService, Vector<Message>> fQueuesMicroService;// can find in this field all the queues of the micro-service according to the name of them
-    private Hashtable<Class<? extends Event>,RoundrobinPattern> fMessagesEvent;
-    private Hashtable<Class<? extends Broadcast>,Vector< MicroService >> fMessageBroadcast;
-    private Hashtable<Class<? extends Event>,Future> fFutureOfEvents;
+
+    private HashMap<MicroService, Queue<Message>> fQueuesMicroService;// can find in this field all the queues of the micro-service according to the name of them
+    private HashMap<Class<? extends Event>, HashMap<Integer,Vector<MicroService >>> fMessagesEvent;
+    private HashMap<Class<? extends Broadcast>,Vector< MicroService >> fMessageBroadcast;
+    private HashMap<Class<? extends Event>,Future> fFutureOfEvents;
 
     /**for Safe Singleton of this class**/
 	private static class SingletonHolder {
 			private static MessageBusImpl instance = new MessageBusImpl();
 		}
 		private MessageBusImpl() {
-            fQueuesMicroService=new Hashtable<MicroService, Vector<Message>>();
-            fMessagesEvent=new Hashtable<Class<? extends Event>,RoundrobinPattern>();
-            fMessageBroadcast=new Hashtable<Class<? extends Broadcast>,Vector< MicroService >>();
+            fQueuesMicroService=new HashMap<MicroService, Queue<Message>>();
+            fMessagesEvent=new HashMap<Class<? extends Event>,HashMap<Integer,Vector<MicroService >>>();
+            fMessageBroadcast=new HashMap<Class<? extends Broadcast>,Vector< MicroService >>();
 		}
 		public static MessageBusImpl getInstance() {
 			return SingletonHolder.instance;

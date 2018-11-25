@@ -1,6 +1,5 @@
 import bgu.spl.mics.*;
 import bgu.spl.mics.Event;
-import bgu.spl.mics.application.messages.BookOrderEvent;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.*;
 import bgu.spl.mics.example.services.ExampleBroadcastListenerService;
