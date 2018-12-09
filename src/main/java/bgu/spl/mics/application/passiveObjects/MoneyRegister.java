@@ -1,7 +1,10 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
-import java.util.Vector;
+import java.io.Serializable;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static bgu.spl.mics.application.BookStoreRunner.printToFile;
 
 /**
  * Passive object representing the store finance management. 
@@ -12,32 +15,36 @@ import java.util.Vector;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class MoneyRegister {
-	private Vector<OrderReceipt> receipts;
-	private static MoneyRegister instance=null;
+public class MoneyRegister implements Serializable {
+	private CopyOnWriteArrayList<OrderReceipt> receipts;
+	private  int totalEarnings;
 	/**
      * Retrieves the single instance of this class.
      */
-	public static MoneyRegister getInstance() {
-		//TODO: Implement this
-		return null;
+	private static class SingletonHolder {
+		private static MoneyRegister instance = new MoneyRegister();
 	}
-	
+	private MoneyRegister() {
+		receipts=new CopyOnWriteArrayList<>();
+		totalEarnings=0;
+	}
+	public static MoneyRegister getInstance() {
+		return SingletonHolder.instance;
+	}
 	/**
      * Saves an order receipt in the money register.
      * <p>   
      * @param r		The receipt to save in the money register.
      */
 	public void file (OrderReceipt r) {
-		//TODO: Implement this.
+		receipts.add(r);
+		totalEarnings=totalEarnings+r.getPrice();
 	}
-	
 	/**
      * Retrieves the current total earnings of the store.  
      */
 	public int getTotalEarnings() {
-		//TODO: Implement this
-		return 0;
+		return totalEarnings;
 	}
 	
 	/**
@@ -46,7 +53,7 @@ public class MoneyRegister {
      * @param amount 	amount to charge
      */
 	private void chargeCreditCard(Customer c, int amount) {
-		// TODO Implement this
+		c.chargeCredit(amount);
 	}
 	
 	/**
@@ -55,6 +62,7 @@ public class MoneyRegister {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		//TODO: Implement this
+		printToFile(filename,this.receipts);
 	}
 }
+

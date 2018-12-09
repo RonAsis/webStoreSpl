@@ -16,8 +16,8 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 public class SellingService extends MicroService{
 	private MoneyRegister moneyRegister;
 
-	public SellingService() {
-		super("Change_This_Name");
+	public SellingService(String name) {
+		super(name);
 		// TODO Implement this
 	}
 

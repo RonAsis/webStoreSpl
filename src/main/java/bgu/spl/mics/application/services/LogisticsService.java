@@ -15,8 +15,8 @@ import bgu.spl.mics.application.messages.DeliveryEvent;
 public class LogisticsService extends MicroService {
 	private DeliveryEvent deliveryEvent;
 
-	public LogisticsService() {
-		super("Change_This_Name");
+	public LogisticsService(String name) {
+		super(name);
 		// TODO Implement this
 	}
 

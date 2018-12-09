@@ -7,6 +7,7 @@ public class DeliveryEvent  implements Event<String> {
         this.senderName = senderName;
     }
 
+
     public String getSenderName() {
         return senderName;
     }

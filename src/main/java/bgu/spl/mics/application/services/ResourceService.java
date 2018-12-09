@@ -15,8 +15,8 @@ import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 public class ResourceService extends MicroService{
 	private ResourcesHolder resourcesHolder;
 
-	public ResourceService() {
-		super("Change_This_Name");
+	public ResourceService(String name) {
+		super(name);
 		// TODO Implement this
 	}
 

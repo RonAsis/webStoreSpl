@@ -16,8 +16,8 @@ import bgu.spl.mics.application.passiveObjects.Inventory;
 public class InventoryService extends MicroService{
 	private Inventory inventory;
 
-	public InventoryService() {
-		super("Change_This_Name");
+	public InventoryService(String name) {
+		super(name);
 		// TODO Implement this
 	}
 

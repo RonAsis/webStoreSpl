@@ -1,12 +1,12 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Passive data-object representing the store inventory.
@@ -20,23 +20,18 @@ import java.util.Hashtable;
  */
 
 public class Inventory {
-	private enum OrderResult{NOT_IN_STOCK,SUCCESSFULLY_TAKEN}
-	private Hashtable<String,BookInventoryInfo> booksInventory;//check it this is safe//////////////////////////////////////////////////
-	private static Inventory instance=null;
+	private ConcurrentHashMap<String,BookInventoryInfo> booksInventory;
 	/**
      * Retrieves the single instance of this class.
      */
+	private static class SingletonHolder {
+		private static Inventory instance = new Inventory();
+	}
+	private Inventory() {
+		booksInventory=new ConcurrentHashMap<String,BookInventoryInfo>();
+	}
 	public static Inventory getInstance() {
-		//TODO: Implement this
-		if(checkExist())//////****//////
-			createInsatnce();//////****//////
-		return instance;//////****//////
-	}
-	private static boolean checkExist(){
-		return instance==null;//////****//////
-	}
-	private static void createInsatnce(){
-		instance=new Inventory();//////****//////
+		return SingletonHolder.instance;
 	}
 	/**
      * Initializes the store inventory. This method adds all the items given to the store
@@ -46,8 +41,8 @@ public class Inventory {
      * 						of the inventory.
      */
 	public void load (BookInventoryInfo[ ] inventory ) {
-		for(BookInventoryInfo bookInventoryInfo:inventory)/////****//////
-			this.booksInventory.put(bookInventoryInfo.getBookTitle(),bookInventoryInfo);/////****//////
+		for(BookInventoryInfo bookInventoryInfo:inventory)
+			this.booksInventory.put(bookInventoryInfo.getBookTitle(),bookInventoryInfo);
 	}
 	
 	/**
@@ -59,17 +54,11 @@ public class Inventory {
      * 			second should reduce by one the number of books of the desired type.
      */
 	public OrderResult take (String book) {
-			if (checkAvailabilty(book)!=null)
-				return  OrderResult.SUCCESSFULLY_TAKEN;//////****//////
-		return OrderResult.NOT_IN_STOCK;//////****//////
-		//return null;////*****//////////
-	}
-	private BookInventoryInfo checkAvailabilty(String book){
-		for(String key: booksInventory.keySet()) {//////****//////
-			if (key.equals(book))//////****//////
-				return booksInventory.get(key);
-		}
-		return null;
+			if (booksInventory.contains(book)) {
+				if(booksInventory.get(book).lessAmountBook())
+					return OrderResult.SUCCESSFULLY_TAKEN;
+			}
+		return OrderResult.NOT_IN_STOCK;
 	}
 	/**
      * Checks if a certain book is available in the inventory.
@@ -78,11 +67,10 @@ public class Inventory {
      * @return the price of the book if it is available, -1 otherwise.
      */
 	public int checkAvailabiltyAndGetPrice(String book) {
-		 return  bookPrice(checkAvailabilty(book));
-		//TODO: Implement this
+		 return  bookPrice(booksInventory.get(book));
 	}
 	private int bookPrice(BookInventoryInfo book){
-		if (book!=null)
+		if (book!=null&& book.getAmountInInventory()>0)
 			return book.getPrice();
 		return -1;
 	}
@@ -90,32 +78,38 @@ public class Inventory {
 	/**
      * 
      * <p>
-     * Prints to a file name @filename a serialized object HashMap<String,Integer> which is a Map of all the books in the inventory. The keys of the Map (type {@link String})
+     * Prints to a file name @fiasd321zxc
+	 * lename a serialized object HashMap<String,Integer> which is a Map of all the books in the inventory. The keys of the Map (type {@link String})
      * should be the titles of the books while the values (type {@link Integer}) should be
      * their respective available amount in the inventory. 
      * This method is called by the main method in order to generate the output.
      */
 	public void printInventoryToFile(String filename){
-		//TODO: Implement this
-		createFile(createHashMap(),filename);//////////////**********///////////////
+		createFile(createHashMap(),filename);
 
 	}
-	private void createFile(HashMap<String,Integer> hmap ,String filename){
-		try//////////////**********///////////////
-		{//////////////**********///////////////
-			FileOutputStream fos =new FileOutputStream(filename);//////////////**********///////////////
-			ObjectOutputStream oos = new ObjectOutputStream(fos);//////////////**********///////////////
-			oos.writeObject(hmap);//////////////**********///////////////
-			oos.close();//////////////**********///////////////
-			fos.close();//////////////**********///////////////
-		}catch(IOException ioe) {//////////////**********///////////////
-			ioe.printStackTrace();//////////////**********///////////////
+	private void createFile(HashMap<String,Integer> hashmap ,String filename){
+		ObjectOutputStream outStream = null;
+		try {
+			outStream = new ObjectOutputStream(new FileOutputStream(filename));
+			outStream.writeObject(hashmap);
+		} catch (IOException ioException) {
+			System.err.println("Error opening file.");
+		} catch (NoSuchElementException noSuchElementException) {
+			System.err.println("Invalid input.");
+		} finally {
+			try {
+				if (outStream != null)
+					outStream.close();
+			} catch (IOException ioException) {
+				System.err.println("Error closing file.");
+			}
 		}
 	}
 	private HashMap<String,Integer> createHashMap(){
-		HashMap<String, Integer> hmap = new HashMap<String, Integer>();//////////////**********///////////////
-		for(String key: booksInventory.keySet())//////****//////
-			hmap.put(key,booksInventory.get(key).getAmountInInventory());//////////////**********///////////////
-		return hmap;//////////////**********///////////////
+		HashMap<String, Integer> hmap = new HashMap<String, Integer>();
+		for(String key: booksInventory.keySet())
+			hmap.put(key,booksInventory.get(key).getAmountInInventory());
+		return hmap;
 	}
 }
