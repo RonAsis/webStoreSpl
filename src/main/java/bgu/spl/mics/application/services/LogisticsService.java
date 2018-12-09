@@ -2,7 +2,9 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DeliveryEvent;
-
+import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
+import bgu.spl.mics.application.passiveObjects.MoneyRegister;
+import bgu.spl.mics.application.passiveObjects.Inventory;
 /**
  * Logistic service in charge of delivering books that have been purchased to customers.
  * Handles {@link DeliveryEvent}.
@@ -15,15 +17,19 @@ import bgu.spl.mics.application.messages.DeliveryEvent;
 public class LogisticsService extends MicroService {
 	private DeliveryEvent deliveryEvent;
 
-	public LogisticsService(String name) {
-		super(name);
-		// TODO Implement this
+	public LogisticsService() {
+		super("Change_This_Name");
+		//this.deliveryEvent = new DeliveryEvent()
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		System.out.println("Service " + getName() + " started");
+		subscribeBroadcast(DeliveryEvent.class, message -> {
+			this.deliveryEvent = new DeliveryEvent(message.)
+			System.out.println("Service " + getName() + " got a new message from " + message.getSenderName() + "! (mbt: " + mbt + ")");
+
+		});
 	}
 
 }

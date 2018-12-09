@@ -2,7 +2,9 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
-
+import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
+import bgu.spl.mics.application.messages.BookOrderEvent;
+import bgu.spl.mics.application.passiveObjects.Inventory;
 /**
  * Selling service in charge of taking orders from customers.
  * Holds a reference to the {@link MoneyRegister} singleton of the store.
@@ -16,8 +18,8 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 public class SellingService extends MicroService{
 	private MoneyRegister moneyRegister;
 
-	public SellingService(String name) {
-		super(name);
+	public SellingService() {
+		super("Change_This_Name");
 		// TODO Implement this
 	}
 
