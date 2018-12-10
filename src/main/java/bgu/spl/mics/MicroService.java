@@ -24,7 +24,7 @@ public abstract class MicroService implements Runnable {
 
     private boolean terminated = false;
     private final String name;
-    private HashMap<Message,Callback> Callbacks;
+    private HashMap<Class,Callback> Callbacks;
 
     /**
      * @param name the micro-service name (used mainly for debugging purposes -
@@ -32,7 +32,7 @@ public abstract class MicroService implements Runnable {
      */
     public MicroService(String name) {
         this.name = name;
-        this.Callbacks = new HashMap<Message,Callback>();
+        this.Callbacks = new HashMap<Class,Callback>();
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
-        this.Callbacks.put(,callback);
+        this.Callbacks.put(type,callback);
         MessageBusImpl.getInstance().subscribeBroadcast(type,this);
     }
 
@@ -151,16 +151,15 @@ public abstract class MicroService implements Runnable {
      * The entry point of the micro-service.
      * otherwise you will end up in an infinite loop.
      */
-    @Override
+
     public final void run() {
         initialize();
         MessageBusImpl.getInstance().register(this);
         while (!terminated) {
             try {
                 Callbacks.get(MessageBusImpl.getInstance().awaitMessage(this)).call(MessageBusImpl.getInstance().awaitMessage(this));
-            }
-            catch (InterruptedException e){
-                System.out.println("The service "+this.name+" was interrupted");
+            } catch (InterruptedException e){
+                System.out.println("Service "+this.name+" interrupted");
             }
         }
     }

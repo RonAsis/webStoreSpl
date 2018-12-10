@@ -3,9 +3,9 @@ package bgu.spl.mics.application;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.application.services.*;
+import bgu.spl.mics.application.passiveObjects.Pair;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
-import javafx.util.Pair;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -152,14 +152,14 @@ private  static void inventoryService(Object object){
 private  static void logisticsService(Object object){
     int size=(Integer)object;
     for (int i =1;i<=size;i++){
-        MicroService microService=new LogisticsService( "logistics "+i);
+        MicroService microService=new LogisticsService( "logistic "+i);
         addThread(microService);
     }
 }
 private static void resourcesService(Object object){
     int size=(Integer)object;
     for (int i =1;i<=size;i++){
-        MicroService microService=new ResourceService( "logistics "+i);
+        MicroService microService=new ResourceService( "resource "+i);
         addThread(microService);
     }
 }
@@ -174,16 +174,12 @@ private static void customers(Object object){
             customerHashMap.put(customer.getId(),customer);
             ArrayList  orderSchedule=(ArrayList)apiService.get("orderSchedule");
             Iterator itOrderSchedule= orderSchedule.iterator();
-            List<Pair<String,Integer>> bookAndTick=new ArrayList<Pair<String, Integer>>();
+            List<Pair> bookAndTick=new ArrayList<Pair>();
            while(itOrderSchedule.hasNext()){
                Map<String,Object> mapOrderSchedule=(Map<String,Object>)itOrderSchedule.next();
                bookAndTick.add(new Pair((String)mapOrderSchedule.get("bookTitle"),(Integer)mapOrderSchedule.get("tick")));
             }
-            bookAndTick.sort(new Comparator<Pair<String,Integer>>(){
-            public int compare(Pair<String,Integer> o1, Pair<String,Integer> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }});
-            MicroService microService=new APIService("customers "+numberName,customer,bookAndTick);
+            MicroService microService=new APIService("Customer "+numberName,customer,bookAndTick);
             numberName++;
             addThread(microService);
     }

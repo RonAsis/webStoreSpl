@@ -46,13 +46,13 @@ public class MoneyRegister implements Serializable {
 	public int getTotalEarnings() {
 		return totalEarnings;
 	}
-	
+
 	/**
      * Charges the credit card of the customer a certain amount of money.
      * <p>
      * @param amount 	amount to charge
      */
-	private void chargeCreditCard(Customer c, int amount) {
+	public void chargeCreditCard(Customer c, int amount) {
 		c.chargeCredit(amount);
 	}
 	

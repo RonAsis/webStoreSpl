@@ -8,5 +8,5 @@ public class GetTickEvent implements Event {
     public GetTickEvent(int tick){
         this.tick = tick;
     }
-
+    public GetTickEvent(){}
 }

@@ -51,6 +51,7 @@ public class ResourcesHolder {
 			notifyAll();
 			return future;
 		}
+
 	private DeliveryVehicle freeVehicle() {
 		DeliveryVehicle ans=null;
 		for (DeliveryVehicle key : mapDeliveryVehicle.keySet()) {

@@ -27,38 +27,37 @@ public class BookInventoryInfo {
 				newValue=fAmountInInventory.get()-1;
 			else
 				return false;
-
 		}while(fAmountInInventory.compareAndSet(oldValue,newValue));
 		return true;
 	}
 	/**
-     * Retrieves the title of this book.
-     * <p>
-     * @return The title of this book.   
-     */
+	 * Retrieves the title of this book.
+	 * <p>
+	 * @return The title of this book.
+	 */
 	public String getBookTitle() {
 		return fBookTitle;
 	}
 
 	/**
-     * Retrieves the amount of books of this type in the inventory.
-     * <p>
-     * @return amount of available books.      
-     */
+	 * Retrieves the amount of books of this type in the inventory.
+	 * <p>
+	 * @return amount of available books.
+	 */
 	public int getAmountInInventory() {
 		return fAmountInInventory.get();
 	}
 
 	/**
-     * Retrieves the price for  book.
-     * <p>
-     * @return the price of the book.
-     */
+	 * Retrieves the price for  book.
+	 * <p>
+	 * @return the price of the book.
+	 */
 	public int getPrice() {
 		return fPrice;
 	}
-	
-	
 
-	
+
+
+
 }

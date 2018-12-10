@@ -101,7 +101,7 @@ public class Inventory {
 		if (booksInventory!=null)
 			for(int i=0; i<booksInventory.size(); i++) {
 				if (booksInventory.get(book)!=null && booksInventory.get(book).getAmountInInventory()>0) {
-					booksInventory.get(book).setAmountInInventory(booksInventory.get(book).getAmountInInventory()-1);
+					booksInventory.get(book).lessAmountBook();
 					return booksInventory.get(book);
 				}
 			}

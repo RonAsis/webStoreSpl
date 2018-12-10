@@ -17,13 +17,23 @@ public class OrderReceipt implements Serializable {
 	private int price;// the price that the customer paid for the book
 	private int issuedTick;// tick in which this receipt was issued
 	private int orderTick;// tick in which the customer ordered the book
-	private int proccessTick;//tick in which the selling service started processing the order
-	/**
-     * Retrieves the orderId of this receipt.
-     */
-	public int getOrderId() {
-		return  this.orderId;
+	private int processTick;//tick in which the selling service started processing the order
+
+	public OrderReceipt (){
+
 	}
+
+	public OrderReceipt (OrderReceipt orderReceipt){
+		this.orderId = orderReceipt.getOrderId();
+		this.seller = orderReceipt.getSeller();
+		this.customerId = orderReceipt.getCustomerId();
+		this.bookTitle = orderReceipt.getBookTitle();
+		this.price = orderReceipt.getPrice();
+		this.issuedTick = orderReceipt.getIssuedTick();
+		this.orderTick = orderReceipt.getOrderTick();
+		this.processTick = orderReceipt.getProcessTick();
+	}
+
 	public OrderReceipt (int issuedTick,String seller,int customerId,String bookTitle,int price,int orderTick){
 		this.issuedTick=issuedTick;
 		this.seller=seller;
@@ -32,61 +42,89 @@ public class OrderReceipt implements Serializable {
 		this.price=price;
 		this.orderTick=orderTick;
 	}
-	public void setOrderTick(int orderTick){
-		this.orderTick=orderTick;
-	}
-	public void setProccessTick(int proccessTick){
-		this.proccessTick=proccessTick;
-	}
+
 	/**
-     * Retrieves the name of the selling service which handled the order.
-     */
+	 * Retrieves the orderId of this receipt.
+	 */
+	public int getOrderId() {
+		return  this.orderId;
+	}
+
+	/**
+	 * Retrieves the name of the selling service which handled the order.
+	 */
 	public String getSeller() {
 		return this.seller;
 	}
-	
+
 	/**
-     * Retrieves the ID of the customer to which this receipt is issued to.
-     * <p>
-     * @return the ID of the customer
-     */
+	 * Retrieves the ID of the customer to which this receipt is issued to.
+	 * <p>
+	 * @return the ID of the customer
+	 */
 	public int getCustomerId() {
 		return this.customerId;
 	}
-	
+
 	/**
-     * Retrieves the name of the book which was bought.
-     */
+	 * Retrieves the name of the book which was bought.
+	 */
 	public String getBookTitle() {
 		return this.bookTitle;
 	}
-	
+
 	/**
-     * Retrieves the price the customer paid for the book.
-     */
+	 * Retrieves the price the customer paid for the book.
+	 */
 	public int getPrice() {
 		return this.price;
 	}
-	
+
 	/**
-     * Retrieves the tick in which this receipt was issued.
-     */
+	 * Retrieves the tick in which this receipt was issued.
+	 */
 	public int getIssuedTick() {
 		return this.issuedTick;
 	}
-	
+
 	/**
-     * Retrieves the tick in which the customer sent the purchase request.
-     */
+	 * Retrieves the tick in which the customer sent the purchase request.
+	 */
 	public int getOrderTick() {
 		return this.orderTick;
 	}
-	
+
 	/**
-     * Retrieves the tick in which the treating selling service started 
-     * processing the order.
-     */
+	 * Retrieves the tick in which the treating selling service started
+	 * processing the order.
+	 */
 	public int getProcessTick() {
-		return this.proccessTick;
+		return this.processTick;
 	}
+
+	public void setOrderId(int orderId){
+		this.orderId=orderId;
+	}
+	public void setSeller(String seller){
+		this.seller=seller;
+	}
+	public void setCustomerId(int customerId){
+		this.customerId=customerId;
+	}
+	public void setBookTitle(String bookTitle){
+		this.bookTitle=bookTitle;
+	}
+	public void setPrice(int price){
+		this.price=price;
+	}
+	public void setIssuedTick(int issuedTick){
+		this.issuedTick=issuedTick;
+	}
+	public void setOrderTick(int orderTick){
+		this.orderTick=orderTick;
+	}
+	public void setProcessTick(int processTick){
+		this.processTick = processTick;
+	}
+
 }

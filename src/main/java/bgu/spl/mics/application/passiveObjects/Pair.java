@@ -4,7 +4,7 @@ public class Pair {
     String name;
     int tick;
 
-    Pair(String name, Integer tick){
+    public Pair(String name, Integer tick){
         this.name = name;
         this.tick = tick;
     }
