@@ -17,18 +17,18 @@ public class MessageBusImpl implements MessageBus {
     private final Object lockMessageEvent=new Object();
     private final Object lockMessageBroadcast=new Object();
     /**for Safe Singleton of this class**/
-	private static class SingletonHolder {
-			private static MessageBusImpl instance = new MessageBusImpl();
-		}
-		private MessageBusImpl() {
-            fQueuesMicroService= new ConcurrentHashMap<>();
-            fMessage= new ConcurrentHashMap<>();
-            fFutureOfEvents= new ConcurrentHashMap<>();
-            fMicroServiceAnsFuture=new ConcurrentHashMap<>();
-		}
-		public static MessageBusImpl getInstance() {
-			return SingletonHolder.instance;
-		}
+    private static class SingletonHolder {
+        private static MessageBusImpl instance = new MessageBusImpl();
+    }
+    private MessageBusImpl() {
+        fQueuesMicroService= new ConcurrentHashMap<>();
+        fMessage= new ConcurrentHashMap<>();
+        fFutureOfEvents= new ConcurrentHashMap<>();
+        fMicroServiceAnsFuture=new ConcurrentHashMap<>();
+    }
+    public static MessageBusImpl getInstance() {
+        return SingletonHolder.instance;
+    }
 
     /**
      * A Micro-Service calls this method in order to subscribe itself for some type of event(t he specific class type of the event is passed as
@@ -36,25 +36,26 @@ public class MessageBusImpl implements MessageBus {
      * @param type The type to subscribe to,
      * @param m    The subscribing micro-service.
      */
-	@Override
-	public  <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
+    @Override
+    public  <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
         synchronized (lockMessageEvent) {
             fMessage.putIfAbsent(type, new ConcurrentLinkedQueue<>());
             subscribe(type,m);
         }
     }
-	private void subscribe(Class<? extends Message> type, MicroService m){
+    private void subscribe(Class<? extends Message> type, MicroService m){
         ConcurrentLinkedQueue<MicroService> queue = fMessage.get(type);
         queue.add(m);
-        }
+        fMessage.put(type,queue);
+    }
     /**
      * A Micro-Service calls this method in order to subscribe itself for some type of broadcast Message(t he specific class type of the event is passed as
      * a parameter)
      * @param type 	The type to subscribe to.
      * @param m    	The subscribing micro-service.
      */
-	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+    @Override
+    public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
         synchronized(lockMessageBroadcast){
             fMessage.putIfAbsent(type,new ConcurrentLinkedQueue<  >());
             subscribe(type,m);
@@ -67,8 +68,8 @@ public class MessageBusImpl implements MessageBus {
      * @param e      The completed eve/nt.
      * @param result The resolved result of the completed event.
      */
-	@Override
-	public <T> void complete(Event<T> e, T result) {
+    @Override
+    public <T> void complete(Event<T> e, T result) {
         synchronized (lockFuture) {
             fFutureOfEvents.get(e).resolve(result);
         }
@@ -77,26 +78,30 @@ public class MessageBusImpl implements MessageBus {
      * A Micro-Service calls this method in order to add a broadcast message to the queues of all Micro-Services which subscribed to receive this specific message type
      * @param b 	The message to added to the queues.
      */
-	@Override
-	public void sendBroadcast(Broadcast b) {
-	    if (System.identityHashCode(lockMessageBroadcast)<System.identityHashCode(fQueuesMicroService))
-        synchronized(lockMessageBroadcast) {
-            synchronized (lockQueuesMicroService) {
-                doSendBroadcat(b);
+    @Override
+    public void sendBroadcast(Broadcast b) {
+        if (System.identityHashCode(lockMessageBroadcast)<System.identityHashCode(fQueuesMicroService))
+            synchronized(lockMessageBroadcast) {
+                synchronized (lockQueuesMicroService) {
+                    doSendBroadcat(b);
+                }
             }
-        }
         else
             synchronized(lockQueuesMicroService) {
                 synchronized (lockMessageBroadcast) {
                     doSendBroadcat(b);
                 }
             }
-	}
+    }
     private void doSendBroadcat(Broadcast b) {
         ConcurrentLinkedQueue<MicroService> queue = fMessage.get(b.getClass());
-            for (MicroService key : queue)
-                fQueuesMicroService.get(key).add(b.getClass());
+        for (MicroService key : queue) {
+            ConcurrentLinkedQueue<Class<? extends Message>> queue1 = fQueuesMicroService.get(key);
+            queue1.add(b.getClass());
+            fQueuesMicroService.put(key, queue1);
+
         }
+    }
     /**
      * A Micro-Service calls this method in order to add the event e to the message queue of one of the Micro-Services
      * which have subscribed to receive events of type e.getClass().
@@ -104,22 +109,22 @@ public class MessageBusImpl implements MessageBus {
      * the result of processing the event once it is completed.If the re is no suitable Micro-Service,should return null.
      * @param e     	The event to add to the queue.
      */
-	@Override
-	public <T> Future<T> sendEvent(Event<T> e) {
+    @Override
+    public <T> Future<T> sendEvent(Event<T> e) {
         if (System.identityHashCode(lockMessageEvent)<System.identityHashCode(lockQueuesMicroService))
             synchronized(lockMessageEvent) {
                 synchronized (lockQueuesMicroService) {
-                  return doSendEvent(e);
+                    return doSendEvent(e);
                 }
             }
         else
             synchronized(lockQueuesMicroService) {
                 synchronized (lockMessageEvent) {
-                  return doSendEvent(e);
+                    return doSendEvent(e);
                 }
             }
-	}
-	private <T> Future<T>  doSendEvent (Event<T> e){
+    }
+    private <T> Future<T>  doSendEvent (Event<T> e){
         MicroService ms;
         synchronized(lockFuture) {
             if ((ms = subScribEventToQuene(e)) != null) {
@@ -129,17 +134,19 @@ public class MessageBusImpl implements MessageBus {
         }
     }
     private <T> MicroService  subScribEventToQuene(Event<T> e){
-        MicroService ms= fMessage.get(e).poll();
-        fMessage.get(e).add(ms);
-        if(ms!=null) {
-            fQueuesMicroService.get(ms).add(e.getClass());
-            fMicroServiceAnsFuture.putIfAbsent(ms,new ConcurrentLinkedQueue<>());
-            return ms;
+        if (fMessage.get(e)!=null) {
+            MicroService ms = fMessage.get(e).poll();
+            fMessage.get(e).add(ms);
+            if (ms != null) {
+                fQueuesMicroService.get(ms).add(e.getClass());
+                fMicroServiceAnsFuture.putIfAbsent(ms, new ConcurrentLinkedQueue<>());
+                return ms;
+            }
         }
         return null;
     }
     private  <T> Future<T> createFutrueEvent(Event<T> e,MicroService ms){
-	    Future <T> future=new Future<>();
+        Future <T> future=new Future<>();
         fMicroServiceAnsFuture.get(ms).add(future);
         fFutureOfEvents.put(e.getClass(),future);
         return future;
@@ -149,27 +156,27 @@ public class MessageBusImpl implements MessageBus {
      * a Micro-Service calls this method in order to register itself. This method should create a queue for the Micro-Service in the Message-Bus
      * @param m the micro-service to create a queue for.
      */
-	@Override
-	public void register(MicroService m) {
+    @Override
+    public void register(MicroService m) {
         fQueuesMicroService.putIfAbsent(m,new ConcurrentLinkedQueue<>());
-	}
+    }
 
 
     /**
      * A Micro-Service calls this method in order to unregister itself.Should remove the message queue allocated to the Micro-Service and clean all the references related to this Message-Bus
      * @param m the micro-service to unregister.
      */
-	@Override
-	public synchronized void unregister(MicroService m) {
+    @Override
+    public synchronized void unregister(MicroService m) {
         ConcurrentLinkedQueue<Future> queueFuture=fMicroServiceAnsFuture.get(m);
-	        for (Future key :queueFuture){
-	            key.resolve(null);
-            }
-            fQueuesMicroService.remove(m);
+        for (Future key :queueFuture){
+            key.resolve(null);
+        }
+        fQueuesMicroService.remove(m);
         for (Class<?extends Message> key :fMessage.keySet()){
             fMessage.remove(key,m);
         }
-	}
+    }
 
     /**
      * A Micro-Service calls this method in order to take a message from its allocated queue. This method is blocking
@@ -177,19 +184,19 @@ public class MessageBusImpl implements MessageBus {
      * @param m The micro-service requesting to take a message from its message queue.
      * @return
      */
-	@Override
-	public Message awaitMessage(MicroService m){
-	    synchronized (lockQueuesMicroService){
-	        while (fQueuesMicroService.get(m).isEmpty()) {
+    @Override
+    public  Message awaitMessage(MicroService m){
+        synchronized (lockQueuesMicroService){
+            while (fQueuesMicroService.get(m).isEmpty()) {
                 try {
-                    wait();
+                    lockQueuesMicroService.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
             Message  message=fQueuesMicroService.get(m).poll().cast(Message.class);
-	        notifyAll();
-	        return message;
+            lockQueuesMicroService.notifyAll();
+            return message;
         }
-	}
+    }
 }

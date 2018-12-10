@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SellingService extends MicroService{
 	private MoneyRegister moneyRegister;
-	private int orderId=1; // in order to keep truck on the receipts' ids
+	private int orderId=1; // in order to keep truck of the receipts' ids
 
 	/**
 	 * SellingService's constructor.

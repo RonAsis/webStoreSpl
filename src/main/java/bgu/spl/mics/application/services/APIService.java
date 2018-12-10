@@ -21,43 +21,32 @@ import java.util.concurrent.TimeUnit;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class APIService extends MicroService{
-	Customer customer;
-	List<Pair> orderSchedule;
+	Customer customer; // the customer that is represented by this this APIService
+	List<Pair> orderSchedule; // a list of the orders service needs to make
 
+	/**
+	 * APIService's constructor.
+	 *
+	 * @param customerId - the id that represents the customer, represents the APIService.
+	 * @param customer - the customer that is represented by this this APIService.
+	 * @param orderSchedule - a list of the orders service needs to make.
+	 */
 	public APIService(String customerId, Customer customer, List<Pair> orderSchedule) {
 		super(customerId);
 		this.customer = customer;
 		this.orderSchedule = orderSchedule;
-		this.orderSchedule.sort(Comparator.comparing(Pair::getTick));
+		this.orderSchedule.sort(Comparator.comparing(Pair::getTick)); // sorting the given list of orders, by tick
 	}
 
-	@Override
+	/**
+	 * This method initializes the APIService.
+	 */
 	protected void initialize() {
-		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-			this.terminate();
-		});
-
-		subscribeBroadcast(TickBroadcast.class, orderBook-> {
-			for (Pair pair : orderSchedule) {
-				if (pair.getTick() == orderBook.getTick()){
-
-					Future<Integer> orderTick = sendEvent(new GetTickEvent());
-					Integer orderTickTime = orderTick.get(1, TimeUnit.MILLISECONDS);
-
-					Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime));
-					if (futureOrder.get(1, TimeUnit.MILLISECONDS)!=null) {
-						OrderReceipt receipt = new OrderReceipt(futureOrder.get());
-						this.customer.addReceipts(receipt);
-					}
-				}
-				else if (pair.getTick() > orderBook.getTick()){
-					break;
-				}
-			}
-		});
-
-
+		terminateService();
+		placeOrder();
+		System.out.println("API service: "+this.getName()+" is initialized");
 	}
+
 	/**
 	 * This method makes sure that the APIService terminates itself
 	 * when StopTickBroadcast is received.
@@ -67,4 +56,33 @@ public class APIService extends MicroService{
 			this.terminate();
 		});
 	}
+
+	/**
+	 * This method places all of the orders that need to be
+	 * made when TickBroadcast is received.
+	 *
+	 * The orders that need to be made, are those where the pair's tick (/the order's tick)
+	 * is equal to the given tick from the broadcast.
+	 */
+	private void placeOrder(){
+		subscribeBroadcast(TickBroadcast.class, orderBook-> {
+			for (Pair pair : orderSchedule) {
+				if (pair.getTick() == orderBook.getTick()){
+
+					Future<Integer> orderTick = sendEvent(new GetTickEvent());
+					Integer orderTickTime = orderTick.get(1, TimeUnit.MILLISECONDS);
+
+					Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime)); // ordering the book
+					if (futureOrder.get(1, TimeUnit.MILLISECONDS)!=null) {
+						OrderReceipt receipt = new OrderReceipt(futureOrder.get()); // adding the receipt to the list of receipts the customer has
+						this.customer.addReceipts(receipt);
+					}
+				}
+				else if (pair.getTick() > orderBook.getTick()){
+					break; // since orderSchedule is sorted, once the pair's tick is greater than the given tick, there's no need to keep looking for orders
+				}
+			}
+		});
+	}
+
 }

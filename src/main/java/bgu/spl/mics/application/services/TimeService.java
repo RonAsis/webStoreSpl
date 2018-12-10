@@ -1,5 +1,4 @@
 package bgu.spl.mics.application.services;
-
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.GetTickEvent;
 import bgu.spl.mics.application.messages.StopTickBroadcast;
@@ -7,7 +6,6 @@ import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
-
 import javax.swing.*;
 
 /**
@@ -24,23 +22,34 @@ public class TimeService extends MicroService{
     Timer timer;
     int speed;
     int duration;
-    int tick = 0; //******************
+    int tick = 0;
 
+    /**
+     * TimeService's constructor.
+     *
+     * @param speed - the speed of the delivery vehicle.
+     * @param duration - the time it takes to get to the customer from the store.
+     */
     public TimeService(Integer speed, Integer duration) {
         super("Time Service");
         this.speed = speed;
         this.duration = duration;
     }
 
-    @Override
+    /**
+     * This method initializes the TimeService.
+     */
     protected void initialize() {
         sendTick();
         terminateBroadcast();
         completeEvent();
-        System.out.println("Timer is initialized");
+        System.out.println("TimeService is initialized");
         this.timer.start();
     }
 
+    /**
+     * This method makes sure that TimeService responds to tickEvent.
+     */
     private void sendTick(){
         timer = new Timer(this.speed, tickEvent->{
             tick++;
@@ -54,15 +63,22 @@ public class TimeService extends MicroService{
         });
     }
 
+    /**
+     * This method makes sure that the TimeService terminates itself
+     * when StopTickBroadcast is received.
+     */
     private void terminateBroadcast(){
         this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
             this.terminate();
         });
     }
 
+    /**
+     * This method makes sure that TimeService responds to GetTickEvent.
+     */
     private void completeEvent(){
         this.subscribeEvent(GetTickEvent.class, e->{
-            complete(e, this.tick);
+            complete(e, this.tick); // returns the current tick
         });
     }
 }

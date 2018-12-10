@@ -66,13 +66,14 @@ public class Inventory {
 	 * 						of the inventory.
 	 */
 	public void load (BookInventoryInfo[ ] inventory ) {
-		if (booksInventory==null || booksInventory.size()!=0) // load will be called only once, in the case of load being called again, the hashtable will be cleared
+		if (booksInventory.size()!=0)// load will be called only once, in the case of load being called again, not changing the inventory
+			return;
+		if (booksInventory==null) // in case booksInventory wasn't initialized
 			createBooksInventory();
-		if (inventory!=null)
-			for(BookInventoryInfo info:inventory)
-				if ((info!=null)){
-					booksInventory.put(info.getBookTitle(),info);
-				}
+		for(BookInventoryInfo info:inventory) // adding the books to booksInventory
+			if ((info!=null)){
+				booksInventory.put(info.getBookTitle(),info);
+			}
 	}
 
 	/**

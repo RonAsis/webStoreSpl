@@ -23,12 +23,28 @@ import java.util.concurrent.TimeUnit;
 public class ResourceService extends MicroService{
 	private ResourcesHolder resourcesHolder;
 
+	/**
+	 * ResourceService's constructor.
+	 *
+	 * @param name - the name of the ResourceService.
+	 */
 	public ResourceService(String name) {
 		super(name);
 		this.resourcesHolder = ResourcesHolder.getInstance();
 	}
 
+	/**
+	 * This method initializes the ResourceService.
+	 */
 	protected void initialize() {
+		sendVehicle();
+		System.out.println("Resources service: "+this.getName()+" is initialized");
+	}
+
+	/**
+	 * This method makes sure that ResourceService responds to to a given ResourceEvent.
+	 */
+	private void sendVehicle(){
 		this.subscribeEvent(ResourceEvent.class, deliveryMessage-> {
 			Future<DeliveryVehicle> futureDeliveryVehicle =	this.resourcesHolder.acquireVehicle();
 			DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(); /// with time or without????

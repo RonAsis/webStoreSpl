@@ -1,14 +1,11 @@
 package bgu.spl.mics.application.services;
-
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.BookOrderEvent;
 import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.messages.TakeBookEvent;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.OrderResult;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
-import com.sun.org.apache.xpath.internal.operations.Or;
 
 /**
  * InventoryService is in charge of the book inventory and stock.
@@ -23,10 +20,16 @@ import com.sun.org.apache.xpath.internal.operations.Or;
 public class InventoryService extends MicroService{
 	private Inventory inventory;
 
+	/**
+	 * InventoryService's constructor.
+	 *
+	 * @param name - the name of the InventoryService
+	 */
 	public InventoryService(String name) {
 		super(name);
 		this.inventory=Inventory.getInstance();
 	}
+
 	/**
 	 * This method initializes the sellingService.
 	 */
@@ -46,18 +49,21 @@ public class InventoryService extends MicroService{
 		});
 	}
 
+	/**
+	 * This method makes sure that InventoryService responds to a given TakeBookEvent.
+	 */
 	private void takeBook(){
 		this.subscribeEvent(TakeBookEvent.class, details -> {
 			int price = this.inventory.checkAvailabiltyAndGetPrice(details.getBookName());
 			if (price!=-1 && price <= details.getMoneyLeft()){
 				OrderResult orderResult = this.inventory.take(details.getBookName());
 				if (orderResult == OrderResult.NOT_IN_STOCK){
-					System.out.println("The book: "+details.getBookName()+" is not in stock");
+					System.out.println("The book: "+details.getBookName()+" is out of stock");
 				}
 				else
 					complete(details, price);
 			}
-			else
+			else // if the customer can't afford the book or if the book is out of stock
 				complete(details, null);
 		});
 	}
