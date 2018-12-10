@@ -27,6 +27,7 @@ public class Customer implements Serializable{
 		this.address=address;
 		this.distance=distance;
 		this.creditCard=creditCard;
+		this.availableAmountInCreditCard=new AtomicInteger();
 		this.availableAmountInCreditCard.set(availableAmountInCreditCard);
 	}
 

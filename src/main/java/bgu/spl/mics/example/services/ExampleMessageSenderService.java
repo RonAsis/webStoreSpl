@@ -1,11 +1,11 @@
 package bgu.spl.mics.example.services;
 
-import java.util.concurrent.TimeUnit;
-
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.ExampleEvent;
+
+import java.util.concurrent.TimeUnit;
 
 public class ExampleMessageSenderService extends MicroService {
 
@@ -26,10 +26,11 @@ public class ExampleMessageSenderService extends MicroService {
         System.out.println("Sender " + getName() + " started");
         if (broadcast) {
             sendBroadcast(new ExampleBroadcast(getName()));
-            System.out.println("Sender " + getName() + " publish an event and terminate");
+            System.out.println("Sender " + getName() + " publish an broadcast and terminate");
             terminate();
         } else {
             Future<String> futureObject = (Future<String>)sendEvent(new ExampleEvent(getName()));
+            terminate();
             if (futureObject != null) {
             	String resolved = futureObject.get(100, TimeUnit.MILLISECONDS);
             	if (resolved != null) {

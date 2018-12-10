@@ -15,6 +15,7 @@ public class BookInventoryInfo {
 
 	public  BookInventoryInfo(String bookTitle,Integer amountInInventory, Integer price){
 		this.fBookTitle=bookTitle;
+		this.fAmountInInventory=new AtomicInteger();
 		this.fAmountInInventory.set(amountInInventory);
 		this.fPrice=price;
 	}
