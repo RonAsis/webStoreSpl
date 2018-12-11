@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
+import javax.swing.text.html.HTMLDocument;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Inventory {
 	private ConcurrentHashMap<String,BookInventoryInfo> booksInventory;
 	/**
-     * Retrieves the single instance of this class.
-     */
+	 * Retrieves the single instance of this class.
+	 */
 	private static class SingletonHolder {
 		private static Inventory instance = new Inventory();
 	}
@@ -34,56 +35,59 @@ public class Inventory {
 		return SingletonHolder.instance;
 	}
 	/**
-     * Initializes the store inventory. This method adds all the items given to the store
-     * inventory.
-     * <p>
-     * @param inventory 	Data structure containing all data necessary for initialization
-     * 						of the inventory.
-     */
+	 * Initializes the store inventory. This method adds all the items given to the store
+	 * inventory.
+	 * <p>
+	 * @param inventory 	Data structure containing all data necessary for initialization
+	 * 						of the inventory.
+	 */
 	public void load (BookInventoryInfo[ ] inventory ) {
 		for(BookInventoryInfo bookInventoryInfo:inventory)
 			this.booksInventory.put(bookInventoryInfo.getBookTitle(),bookInventoryInfo);
 	}
-	
+
 	/**
-     * Attempts to take one book from the store.
-     * <p>
-     * @param book 		Name of the book to take from the store
-     * @return 	an {@link Enum} with options NOT_IN_STOCK and SUCCESSFULLY_TAKEN.
-     * 			The first should not change the state of the inventory while the 
-     * 			second should reduce by one the number of books of the desired type.
-     */
+	 * Attempts to take one book from the store.
+	 * <p>
+	 * @param book 		Name of the book to take from the store
+	 * @return 	an {@link Enum} with options NOT_IN_STOCK and SUCCESSFULLY_TAKEN.
+	 * 			The first should not change the state of the inventory while the
+	 * 			second should reduce by one the number of books of the desired type.
+	 */
 	public OrderResult take (String book) {
-			if (booksInventory.contains(book)) {
-				if(booksInventory.get(book).lessAmountBook())
+		for (String key:booksInventory.keySet()){
+			if (book.equals(key)) {
+				if (booksInventory.get(book).lessAmountBook()) {
 					return OrderResult.SUCCESSFULLY_TAKEN;
+				}
 			}
+		}
 		return OrderResult.NOT_IN_STOCK;
 	}
 	/**
-     * Checks if a certain book is available in the inventory.
-     * <p>
-     * @param book 		Name of the book.
-     * @return the price of the book if it is available, -1 otherwise.
-     */
+	 * Checks if a certain book is available in the inventory.
+	 * <p>
+	 * @param book 		Name of the book.
+	 * @return the price of the book if it is available, -1 otherwise.
+	 */
 	public int checkAvailabiltyAndGetPrice(String book) {
-		 return  bookPrice(booksInventory.get(book));
+		return  bookPrice(booksInventory.get(book));
 	}
 	private int bookPrice(BookInventoryInfo book){
 		if (book!=null&& book.getAmountInInventory()>0)
 			return book.getPrice();
 		return -1;
 	}
-	
+
 	/**
-     * 
-     * <p>
-     * Prints to a file name @fiasd321zxc
+	 *
+	 * <p>
+	 * Prints to a file name @fiasd321zxc
 	 * lename a serialized object HashMap<String,Integer> which is a Map of all the books in the inventory. The keys of the Map (type {@link String})
-     * should be the titles of the books while the values (type {@link Integer}) should be
-     * their respective available amount in the inventory. 
-     * This method is called by the main method in order to generate the output.
-     */
+	 * should be the titles of the books while the values (type {@link Integer}) should be
+	 * their respective available amount in the inventory.
+	 * This method is called by the main method in order to generate the output.
+	 */
 	public void printInventoryToFile(String filename){
 		createFile(createHashMap(),filename);
 

@@ -93,6 +93,6 @@ public class Customer implements Serializable{
 		do{
 			oldValue=this.availableAmountInCreditCard.get();
 			newValue=this.availableAmountInCreditCard.get()-amount;
-		}while(this.availableAmountInCreditCard.compareAndSet(oldValue,newValue));
+		}while(!this.availableAmountInCreditCard.compareAndSet(oldValue,newValue));
 	}
 }

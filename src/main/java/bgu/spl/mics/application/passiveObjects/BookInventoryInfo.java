@@ -25,10 +25,10 @@ public class BookInventoryInfo {
 		do{
 			oldValue=fAmountInInventory.get();
 			if(oldValue>0)
-				newValue=fAmountInInventory.get()-1;
+				newValue = fAmountInInventory.get() - 1;
 			else
 				return false;
-		}while(fAmountInInventory.compareAndSet(oldValue,newValue));
+		}while(!fAmountInInventory.compareAndSet(oldValue,newValue));
 		return true;
 	}
 	/**

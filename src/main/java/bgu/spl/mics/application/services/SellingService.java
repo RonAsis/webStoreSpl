@@ -61,11 +61,11 @@ public class SellingService extends MicroService{
 		this.subscribeEvent(BookOrderEvent.class, details -> {
 			// Initializing the time in which the selling service started processing the order
 			Future<Integer> processTick = sendEvent(new GetTickEvent());
-			Integer processTickTime = processTick.get(1, TimeUnit.MILLISECONDS);
+			Integer processTickTime = processTick.get(1, TimeUnit.SECONDS);
 
 			// Saving the price the customer paid for the book, this price is returned from TakeBookEvent
 			Future<Integer> takeBook = sendEvent(new TakeBookEvent(details.getBookName(), details.getCustomer().getAvailableCreditAmount()));
-			Integer price = takeBook.get(1, TimeUnit.MILLISECONDS);
+			Integer price = takeBook.get(1, TimeUnit.SECONDS);
 
 			// Initializing a new receipt for this order
 			OrderReceipt receipt = new OrderReceipt();
@@ -78,7 +78,7 @@ public class SellingService extends MicroService{
 
 				// Initializing the time in which this receipt was issued
 				Future<Integer> issuedTick = sendEvent(new GetTickEvent());
-				Integer issuedTickTime = issuedTick.get(1, TimeUnit.MILLISECONDS);
+				Integer issuedTickTime = issuedTick.get(1, TimeUnit.SECONDS);
 
 				// Setting all of the receipt's details/information
 				setReceipt(receipt, details, processTickTime, issuedTickTime, price);
@@ -87,7 +87,7 @@ public class SellingService extends MicroService{
 				complete(details, receipt);
 				// Ordering a delivery of the book
 				sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
-				System.out.println("The customer: " + details.getCustomer().getName() + " bought the book: " + details.getBookName());
+				System.out.println("The customer: " + details.getCustomer().getName() + ", bought the book: " + details.getBookName());
 			} else {
 				complete(details, receipt);
 				System.out.println("The order " + details.getCustomer().getName() + " made failed.");

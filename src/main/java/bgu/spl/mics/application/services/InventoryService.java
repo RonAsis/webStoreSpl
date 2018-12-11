@@ -57,7 +57,7 @@ public class InventoryService extends MicroService{
 			int price = this.inventory.checkAvailabiltyAndGetPrice(details.getBookName());
 			if (price!=-1 && price <= details.getMoneyLeft()){
 				OrderResult orderResult = this.inventory.take(details.getBookName());
-				if (orderResult == OrderResult.NOT_IN_STOCK){
+				if (orderResult.equals(OrderResult.NOT_IN_STOCK)){
 					System.out.println("The book: "+details.getBookName()+" is out of stock");
 				}
 				else

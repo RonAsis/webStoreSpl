@@ -40,6 +40,7 @@ public class ResourcesHolder {
      */
 	public synchronized  Future<DeliveryVehicle> acquireVehicle() {
 			while (!haveFreeVehicle()) {
+				System.out.println("8989898989");
 				try {
 					wait();
 				} catch (InterruptedException e) {
@@ -53,15 +54,13 @@ public class ResourcesHolder {
 		}
 
 	private DeliveryVehicle freeVehicle() {
-		DeliveryVehicle ans=null;
 		for (DeliveryVehicle key : mapDeliveryVehicle.keySet()) {
-			if (mapDeliveryVehicle.get(key) != false) {
-				ans = key;
+			if (mapDeliveryVehicle.get(key) == false) {
 				mapDeliveryVehicle.put(key, true);
-				break;
+				return key;
 			}
 		}
-		return ans;
+		return null;
 	}
 	private boolean haveFreeVehicle() {
 			return this.amountVehicle - this.catchingVehicle > 0;
