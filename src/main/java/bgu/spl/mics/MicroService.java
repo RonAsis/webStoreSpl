@@ -137,6 +137,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final void terminate() {
         this.terminated = true;
+        MessageBusImpl.getInstance().unregister(this);
     }
 
     /**
@@ -157,9 +158,12 @@ public abstract class MicroService implements Runnable {
         MessageBusImpl.getInstance().register(this);
         while (!terminated) {
             try {
-                Callbacks.get(MessageBusImpl.getInstance().awaitMessage(this)).call(MessageBusImpl.getInstance().awaitMessage(this));
-            } catch (InterruptedException e){
-                System.out.println("Service "+this.name+" interrupted");
+                Message m=MessageBusImpl.getInstance().awaitMessage(this);
+                 Callbacks.get(m.getClass()).call(m);
+            } catch (InterruptedException e) {
+            }
+            catch (IllegalStateException e){
+
             }
         }
     }

@@ -1,5 +1,8 @@
 package bgu.spl.mics;
-import java.util.concurrent.*;
+
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -8,14 +11,13 @@ import java.util.concurrent.*;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, ConcurrentLinkedQueue<Message>> fQueuesMicroService;// can find in this field all the queues of the micro-service according to the name of them
-    private ConcurrentHashMap<Class<? extends Message>, ConcurrentLinkedQueue< MicroService >> fMessage;
+    private ConcurrentHashMap<MicroService, LinkedBlockingQueue<Message>> fQueuesMicroService;// can find in this field all the queues of the micro-service according to the name of them
+    private ConcurrentHashMap<Class<? extends Message>, LinkedBlockingQueue< MicroService >> fMessage;
     private ConcurrentHashMap<Event,Future> fFutureOfEvents;
-    private ConcurrentHashMap<MicroService,ConcurrentLinkedQueue<Future>> fMicroServiceAnsFuture;
+    private ConcurrentHashMap<MicroService,LinkedBlockingQueue<Future>> fMicroServiceAndFuture;
     private final Object lockFuture=new Object();// lock the two data base of future
     private final Object lockQueuesMicroService=new Object();
     private final Object lockMessageEvent=new Object();
-    private final Object lockMessageBroadcast=new Object();
     /**for Safe Singleton of this class**/
 	private static class SingletonHolder {
 			private static MessageBusImpl instance = new MessageBusImpl();
@@ -24,7 +26,7 @@ public class MessageBusImpl implements MessageBus {
             fQueuesMicroService= new ConcurrentHashMap<>();
             fMessage= new ConcurrentHashMap<>();
             fFutureOfEvents= new ConcurrentHashMap<>();
-            fMicroServiceAnsFuture=new ConcurrentHashMap<>();
+            fMicroServiceAndFuture=new ConcurrentHashMap<>();
 		}
 		public static MessageBusImpl getInstance() {
 			return SingletonHolder.instance;
@@ -33,19 +35,21 @@ public class MessageBusImpl implements MessageBus {
     /**
      * A Micro-Service calls this method in order to subscribe itself for some type of event(t he specific class type of the event is passed as
      * a parameter)
+     *
      * @param type The type to subscribe to,
      * @param m    The subscribing micro-service.
      */
 	@Override
 	public  <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
         synchronized (lockMessageEvent) {
-            fMessage.putIfAbsent(type, new ConcurrentLinkedQueue<>());
-            subscribe(type,m);
+            if(type!=null && m!=null) {
+                fMessage.putIfAbsent(type, new LinkedBlockingQueue<>());
+                subscribe(type, m);
+            }
         }
     }
 	private void subscribe(Class<? extends Message> type, MicroService m){
-        ConcurrentLinkedQueue<MicroService> queue = fMessage.get(type);
-        queue.add(m);
+        fMessage.get(type).add(m);
         }
     /**
      * A Micro-Service calls this method in order to subscribe itself for some type of broadcast Message(t he specific class type of the event is passed as
@@ -55,12 +59,11 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-        synchronized(lockMessageBroadcast){
-            fMessage.putIfAbsent(type,new ConcurrentLinkedQueue<  >());
-            subscribe(type,m);
+	    if(type!=null && m!=null) {
+            fMessage.putIfAbsent(type, new LinkedBlockingQueue<>());
+            subscribe(type, m);
         }
     }
-
     /**
      * Micro-Service calls this method in order to notify the Message-Bus that the event was handled, and providing the result of handling the request. The Future object associated with event e
      * should be resolved to the result given as a parameter
@@ -70,7 +73,8 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> void complete(Event<T> e, T result) {
         synchronized (lockFuture) {
-            fFutureOfEvents.get(e).resolve(result);
+            if(e!=null && fFutureOfEvents.get(e)!=null)
+                fFutureOfEvents.get(e).resolve(result);
         }
     }
     /**
@@ -79,24 +83,16 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public void sendBroadcast(Broadcast b) {
-	    if (System.identityHashCode(lockMessageBroadcast)<System.identityHashCode(fQueuesMicroService))
-        synchronized(lockMessageBroadcast) {
-            synchronized (lockQueuesMicroService) {
-                doSendBroadcat(b);
-            }
-        }
-        else
             synchronized(lockQueuesMicroService) {
-                synchronized (lockMessageBroadcast) {
                     doSendBroadcat(b);
-                }
             }
 	}
     private void doSendBroadcat(Broadcast b) {
-        ConcurrentLinkedQueue<MicroService> queue = fMessage.get(b.getClass());
+        LinkedBlockingQueue<MicroService> queue = fMessage.get(b.getClass());
         if(queue!=null) {
-            for (MicroService key : queue)
-                fQueuesMicroService.get(key).add(b);
+            Iterator it=queue.iterator();
+            while (it.hasNext())
+                fQueuesMicroService.get(it.next()).add(b);
         }
     }
     /**
@@ -108,13 +104,6 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-        if (System.identityHashCode(lockMessageEvent)<System.identityHashCode(lockQueuesMicroService))
-            synchronized(lockMessageEvent) {
-                synchronized (lockQueuesMicroService) {
-                  return doSendEvent(e);
-                }
-            }
-        else
             synchronized(lockQueuesMicroService) {
                 synchronized (lockMessageEvent) {
                   return doSendEvent(e);
@@ -124,19 +113,21 @@ public class MessageBusImpl implements MessageBus {
 	private <T> Future<T>  doSendEvent (Event<T> e){
         MicroService ms;
         synchronized(lockFuture) {
-            if ((ms = subScribEventToQuene(e)) != null) {
+            if ((ms = addEventToQueneOfMicroServer(e)) != null) {
                 return createFutrueEvent(e, ms);
             }
             return null;
         }
     }
-    private <T> MicroService  subScribEventToQuene(Event<T> e){
-	    if(fMessage.get(e)!=null){
-        MicroService ms= fMessage.get(e).poll();
-        fMessage.get(e).add(ms);
-        if(ms!=null) {
-            fQueuesMicroService.get(ms).add(e);
-            fMicroServiceAnsFuture.putIfAbsent(ms,new ConcurrentLinkedQueue<>());
+    private <T> MicroService  addEventToQueneOfMicroServer(Event<T> e){
+        LinkedBlockingQueue< MicroService > queueOfEvent;
+        MicroService ms;
+	    if((queueOfEvent=fMessage.get(e.getClass()))!=null && (ms = queueOfEvent.poll())!=null){
+            queueOfEvent.add(ms);
+            LinkedBlockingQueue< Message > queueOfMs;
+        if(ms!=null && (queueOfMs=fQueuesMicroService.get(ms))!=null) {
+            queueOfMs.add(e);
+            fMicroServiceAndFuture.putIfAbsent(ms,new LinkedBlockingQueue<>());
             return ms;
         }
 	    }
@@ -144,7 +135,7 @@ public class MessageBusImpl implements MessageBus {
     }
     private  <T> Future<T> createFutrueEvent(Event<T> e,MicroService ms){
 	    Future <T> future=new Future<>();
-        fMicroServiceAnsFuture.get(ms).add(future);
+        fMicroServiceAndFuture.get(ms).add(future);
         fFutureOfEvents.put(e,future);
         return future;
     }
@@ -155,7 +146,7 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public void register(MicroService m) {
-        fQueuesMicroService.putIfAbsent(m,new ConcurrentLinkedQueue<>());
+        fQueuesMicroService.putIfAbsent(m,new LinkedBlockingQueue<>());
 	}
 
 
@@ -165,13 +156,17 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public synchronized void unregister(MicroService m) {
-        ConcurrentLinkedQueue<Future> queueFuture=fMicroServiceAnsFuture.get(m);
-	        for (Future key :queueFuture){
-	            key.resolve(null);
+        LinkedBlockingQueue<Future> queueFuture=fMicroServiceAndFuture.get(m);
+        if(queueFuture!=null) {
+            for (Future key : queueFuture) {
+                if(!key.isDone())
+                    key.resolve(null);
             }
+            fMicroServiceAndFuture.remove(m);
+        }
             fQueuesMicroService.remove(m);
         for (Class<?extends Message> key :fMessage.keySet()){
-            fMessage.remove(key,m);
+            fMessage.get(key).remove(m);
         }
 	}
 
@@ -182,16 +177,7 @@ public class MessageBusImpl implements MessageBus {
      * @return
      */
 	@Override
-	public Message awaitMessage(MicroService m){
-	    synchronized (lockQueuesMicroService){
-	        while (fQueuesMicroService.get(m).isEmpty()) {
-                try {
-                    lockQueuesMicroService.wait();
-                } catch (InterruptedException e) { }
-            }
-            Message message=fQueuesMicroService.get(m).poll();
-            lockQueuesMicroService.notifyAll();
-	        return message;
-        }
+	public Message awaitMessage(MicroService m) throws InterruptedException, IllegalStateException {
+	    return  fQueuesMicroService.get(m).take();
 	}
 }

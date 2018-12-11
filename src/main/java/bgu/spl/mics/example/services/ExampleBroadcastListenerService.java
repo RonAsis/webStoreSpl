@@ -29,7 +29,7 @@ public class ExampleBroadcastListenerService extends MicroService {
     protected void initialize() {
         System.out.println("Listener " + getName() + " started");
         
-        subscribeBroadcast(ExampleBroadcast.class, (message) -> {
+        subscribeBroadcast(ExampleBroadcast.class, message -> {
             mbt--;
             System.out.println("Listener " + getName() + " got a new message from " + message.getSenderId() + "! (mbt: " + mbt + ")");
             if (mbt == 0) {

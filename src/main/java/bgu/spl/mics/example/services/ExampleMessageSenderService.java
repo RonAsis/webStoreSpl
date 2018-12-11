@@ -30,7 +30,7 @@ public class ExampleMessageSenderService extends MicroService {
             terminate();
         } else {
             Future<String> futureObject = (Future<String>)sendEvent(new ExampleEvent(getName()));
-            terminate();
+
             if (futureObject != null) {
             	String resolved = futureObject.get(100, TimeUnit.MILLISECONDS);
             	if (resolved != null) {
@@ -43,6 +43,7 @@ public class ExampleMessageSenderService extends MicroService {
             else {
             	System.out.println("No Micro-Service has registered to handle ExampleEvent events! The event cannot be processed");
             }
+            terminate();
         }
     }
 
