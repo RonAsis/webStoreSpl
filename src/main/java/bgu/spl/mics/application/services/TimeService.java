@@ -53,7 +53,7 @@ public class TimeService extends MicroService{
     private void sendTick(){
         timer = new Timer(this.speed, tickEvent->{
             tick++;
-           // System.out.println("Tick: "+ this.tick);
+         //  System.out.println("Tick: "+ this.tick);
             if (this.tick == this.duration) {
                 sendBroadcast(new StopTickBroadcast(tick));
                 this.timer.stop();

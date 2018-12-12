@@ -40,7 +40,6 @@ public class ResourcesHolder {
      */
 	public synchronized  Future<DeliveryVehicle> acquireVehicle() {
 			while (!haveFreeVehicle()) {
-				System.out.println("8989898989");
 				try {
 					wait();
 				} catch (InterruptedException e) {

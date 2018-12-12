@@ -84,7 +84,7 @@ public class APIService extends MicroService{
 							}
 						}
 						else
-							System.out.println("can not make order, bookorderevent is null");
+							System.out.println("can not make order, orderTickTime is null");
 					}
 					else
 						System.out.println("can not finish order, timer killed itself");

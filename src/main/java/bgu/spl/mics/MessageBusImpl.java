@@ -16,6 +16,7 @@ public class MessageBusImpl implements MessageBus {
     private ConcurrentHashMap<Event,Future> fFutureOfEvents;
     private ConcurrentHashMap<MicroService,LinkedBlockingQueue<Future>> fMicroServiceAndFuture;
     private final Object lockMessageEvent=new Object();
+    private final  Object lockFutures=new Object();
     /**for Safe Singleton of this class**/
 	private static class SingletonHolder {
 			private static MessageBusImpl instance = new MessageBusImpl();
@@ -70,8 +71,11 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-            if(e!=null && fFutureOfEvents.get(e)!=null)
-                fFutureOfEvents.get(e).resolve(result);
+	        synchronized (lockFutures) {
+                if (e != null && fFutureOfEvents.get(e) != null) {
+                    fFutureOfEvents.get(e).resolve(result);
+                }
+            }
     }
     /**
      * A Micro-Service calls this method in order to add a broadcast message to the queues of all Micro-Services which subscribed to receive this specific message type
@@ -85,8 +89,10 @@ public class MessageBusImpl implements MessageBus {
         LinkedBlockingQueue<MicroService> queue = fMessage.get(b.getClass());
         if(queue!=null) {
             Iterator it=queue.iterator();
-            while (it.hasNext())
-                fQueuesMicroService.get(it.next()).add(b);
+            while (it.hasNext()) {
+                MicroService m=(MicroService)it.next();
+                fQueuesMicroService.get(m).add(b);
+            }
         }
     }
     /**
@@ -99,7 +105,9 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
                 synchronized (lockMessageEvent) {
-                  return doSendEvent(e);
+                    synchronized (lockFutures) {
+                        return doSendEvent(e);
+                    }
             }
 	}
 	private <T> Future<T>  doSendEvent (Event<T> e){
@@ -154,7 +162,7 @@ public class MessageBusImpl implements MessageBus {
             fMessage.get(key).remove(m);
         }}
         fQueuesMicroService.remove(m);//remove the micro server with queue of him
-        resolveFurtureToNull(m);// resolve all the future to null
+            resolveFurtureToNull(m);// resolve all the future to null
 	}}
 
     /**
