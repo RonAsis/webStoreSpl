@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.ResourceEvent;
+import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.Inventory;
@@ -30,8 +31,19 @@ public class LogisticsService extends MicroService {
 	 * This method initializes the LogisticsService.
 	 */
 	protected void initialize() {
+		terminateService();
 		sendDelivery();
-		System.out.println("Logistics service: "+this.getName()+" is initialized");
+		//System.out.println("Logistics service: "+this.getName()+" is initialized");
+	}
+
+	/**
+	 * This method makes sure that the LogisticsService terminates itself
+	 * when StopTickBroadcast is received.
+	 */
+	private void terminateService(){
+		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
+			this.terminate();
+		});
 	}
 
 	/**

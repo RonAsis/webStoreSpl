@@ -41,9 +41,9 @@ public class TimeService extends MicroService{
      */
     protected void initialize() {
         sendTick();
-        terminateBroadcast();
+        terminateService();
         completeEvent();
-        System.out.println("TimeService is initialized");
+     //   System.out.println("TimeService is initialized");
         this.timer.start();
     }
 
@@ -53,7 +53,7 @@ public class TimeService extends MicroService{
     private void sendTick(){
         timer = new Timer(this.speed, tickEvent->{
             tick++;
-            System.out.println("Tick: "+ this.tick);
+           // System.out.println("Tick: "+ this.tick);
             if (this.tick == this.duration) {
                 sendBroadcast(new StopTickBroadcast(tick));
                 this.timer.stop();
@@ -67,7 +67,7 @@ public class TimeService extends MicroService{
      * This method makes sure that the TimeService terminates itself
      * when StopTickBroadcast is received.
      */
-    private void terminateBroadcast(){
+    private void terminateService(){
         this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
             this.terminate();
         });

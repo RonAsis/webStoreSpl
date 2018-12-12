@@ -46,7 +46,7 @@ public class APIService extends MicroService{
 	protected void initialize() {
 		terminateService();
 		placeOrder();
-		System.out.println("API service: "+this.getName()+" is initialized");
+		//System.out.println("API service: "+this.getName()+" is initialized");
 	}
 
 	/**
@@ -70,14 +70,24 @@ public class APIService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, orderBook-> {
 			for (Pair pair : orderSchedule) {
 				if (pair.getTick() == orderBook.getTick()){
-
 					Future<Integer> orderTick = sendEvent(new GetTickEvent());
-					Integer orderTickTime = orderTick.get(1, TimeUnit.MILLISECONDS);
-					Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime)); // ordering the book
-					if (futureOrder.get(1, TimeUnit.MILLISECONDS)!=null) {
-						OrderReceipt receipt = new OrderReceipt(futureOrder.get()); // adding the receipt to the list of receipts the customer has
-						this.customer.addReceipts(receipt);
+
+					if (orderTick!=null){
+						Integer orderTickTime = orderTick.get(1, TimeUnit.SECONDS);
+
+						if (orderTickTime!=null){
+							Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime)); // ordering the book
+
+							if (futureOrder!=null && futureOrder.get(1, TimeUnit.SECONDS)!=null) {
+								OrderReceipt receipt = new OrderReceipt(futureOrder.get()); // adding the receipt to the list of receipts the customer has
+								this.customer.addReceipts(receipt);
+							}
+						}
+						else
+							System.out.println("can not make order, bookorderevent is null");
 					}
+					else
+						System.out.println("can not finish order, timer killed itself");
 				}
 				else if (pair.getTick() > orderBook.getTick()){
 					break; // since orderSchedule is sorted, once the pair's tick is greater than the given tick, there's no need to keep looking for orders

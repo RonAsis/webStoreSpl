@@ -4,6 +4,7 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.ResourceEvent;
+import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.Inventory;
@@ -37,9 +38,21 @@ public class ResourceService extends MicroService{
 	 * This method initializes the ResourceService.
 	 */
 	protected void initialize() {
+		terminateService();
 		sendVehicle();
-		System.out.println("Resources service: "+this.getName()+" is initialized");
+		//System.out.println("Resources service: "+this.getName()+" is initialized");
 	}
+
+	/**
+	 * This method makes sure that the ResourceService terminates itself
+	 * when StopTickBroadcast is received.
+	 */
+	private void terminateService(){
+		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
+			this.terminate();
+		});
+	}
+
 
 	/**
 	 * This method makes sure that ResourceService responds to to a given ResourceEvent.
@@ -47,9 +60,13 @@ public class ResourceService extends MicroService{
 	private void sendVehicle(){
 		this.subscribeEvent(ResourceEvent.class, deliveryMessage-> {
 			Future<DeliveryVehicle> futureDeliveryVehicle =	this.resourcesHolder.acquireVehicle();
-			DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(); /// with time or without????
-			deliveryVehicle.deliver(deliveryMessage.getDeliveryMessage().getAddress(), deliveryMessage.getDeliveryMessage().getDistance());
-			this.resourcesHolder.releaseVehicle(deliveryVehicle);
+			DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(1, TimeUnit.SECONDS); /// with time or without????
+			if (deliveryVehicle!=null){
+				deliveryVehicle.deliver(deliveryMessage.getDeliveryMessage().getAddress(), deliveryMessage.getDeliveryMessage().getDistance());
+				this.resourcesHolder.releaseVehicle(deliveryVehicle);
+			}
+			//else
+			//	System.out.println("There are no vehicles");
 		});
 	}
 
