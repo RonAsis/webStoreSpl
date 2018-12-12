@@ -18,6 +18,7 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
  */
 
 public class InventoryService extends MicroService{
+	// @INV if (price=this.inventory.checkAvailabiltyAndGetPrice(details.getBookName()!=-1) price <=getMoneyLeft()
 	private Inventory inventory;
 
 	/**

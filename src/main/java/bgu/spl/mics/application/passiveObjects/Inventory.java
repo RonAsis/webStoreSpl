@@ -1,7 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
-import javax.swing.text.html.HTMLDocument;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -21,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class Inventory {
+    //@INV: booksInventory.get(book).getAmountInInventory()>=0
+
 	private ConcurrentHashMap<String,BookInventoryInfo> booksInventory;
 	/**
 	 * Retrieves the single instance of this class.
@@ -54,10 +55,13 @@ public class Inventory {
 	 * 			The first should not change the state of the inventory while the
 	 * 			second should reduce by one the number of books of the desired type.
 	 */
+	//@PRE book!=null
+    //POST if(booksInventory.get(book)!=null && booksInventory.get(book).lessAmountBook())booksInventory.get(book).getAmountInInventory()-1
 	public OrderResult take (String book) {
 		for (String key:booksInventory.keySet()){
 			if (book.equals(key)) {
-				if (booksInventory.get(book).lessAmountBook()) {
+			    BookInventoryInfo b=booksInventory.get(book);
+				if (b!=null && b.lessAmountBook()) {
 					return OrderResult.SUCCESSFULLY_TAKEN;
 				}
 			}

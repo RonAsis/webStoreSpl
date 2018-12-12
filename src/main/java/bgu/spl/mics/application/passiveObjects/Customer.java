@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * You may add fields and methods to this class as you see fit (including public methods).
  */
 public class Customer implements Serializable{
+	//@INV availableAmountInCreditCard>=0
 	private int id;//the id of the customer
 	private String name;//the name of the customer
 	private String address;// the address of the customer
@@ -19,7 +20,6 @@ public class Customer implements Serializable{
 	private CopyOnWriteArrayList<OrderReceipt> receipts;//all the receipts issued to the customer
 	private int creditCard;//The number of the credit card of the customer
 	private AtomicInteger availableAmountInCreditCard;//The remaining available amount of money in the credit card of the customer.
-	/////****need check if this is duble on something else
 
 	public Customer(int id,String name, String address,int distance,int creditCard,int availableAmountInCreditCard){
 		this.id=id;

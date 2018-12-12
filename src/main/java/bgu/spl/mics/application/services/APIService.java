@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class APIService extends MicroService{
+	//@INV for (i:0->customer.getCustomerReceiptList.size()) customer.getCustomerReceiptList.get(i).issuedTick>=
+	// 									orderSchedule.get(customer.getCustomerReceiptList.get(i).getName).getTick()
 	Customer customer; // the customer that is represented by this this APIService
 	List<Pair> orderSchedule; // a list of the orders service needs to make
 

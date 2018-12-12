@@ -29,6 +29,7 @@ public class OrderReceipt implements Serializable {
 	 * OrderReceipt's copy constructor.
 	 */
 	public OrderReceipt (OrderReceipt orderReceipt){
+		//@INV this.issuedTick==this.processTick &&  this.processTick <=this.orderTick && this.issuedTick <=this.orderTick
 		this.orderId = orderReceipt.getOrderId();
 		this.seller = orderReceipt.getSeller();
 		this.customerId = orderReceipt.getCustomerId();
