@@ -15,8 +15,6 @@ public class MessageBusImpl implements MessageBus {
     private ConcurrentHashMap<Class<? extends Message>, LinkedBlockingQueue< MicroService >> fMessage;
     private ConcurrentHashMap<Event,Future> fFutureOfEvents;
     private ConcurrentHashMap<MicroService,LinkedBlockingQueue<Future>> fMicroServiceAndFuture;
-    private final Object lockFuture=new Object();// lock the two data base of future
-    private final Object lockQueuesMicroService=new Object();
     private final Object lockMessageEvent=new Object();
     /**for Safe Singleton of this class**/
 	private static class SingletonHolder {
@@ -72,10 +70,8 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-        synchronized (lockFuture) {
             if(e!=null && fFutureOfEvents.get(e)!=null)
                 fFutureOfEvents.get(e).resolve(result);
-        }
     }
     /**
      * A Micro-Service calls this method in order to add a broadcast message to the queues of all Micro-Services which subscribed to receive this specific message type
@@ -83,9 +79,7 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public void sendBroadcast(Broadcast b) {
-            synchronized(lockQueuesMicroService) {
                     doSendBroadcat(b);
-            }
 	}
     private void doSendBroadcat(Broadcast b) {
         LinkedBlockingQueue<MicroService> queue = fMessage.get(b.getClass());
@@ -104,20 +98,16 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-            synchronized(lockQueuesMicroService) {
                 synchronized (lockMessageEvent) {
                   return doSendEvent(e);
-                }
             }
 	}
 	private <T> Future<T>  doSendEvent (Event<T> e){
         MicroService ms;
-        synchronized(lockFuture) {
             if ((ms = addEventToQueneOfMicroServer(e)) != null) {
                 return createFutrueEvent(e, ms);
             }
             return null;
-        }
     }
     private <T> MicroService  addEventToQueneOfMicroServer(Event<T> e){
         LinkedBlockingQueue< MicroService > queueOfEvent;
@@ -146,7 +136,9 @@ public class MessageBusImpl implements MessageBus {
      */
 	@Override
 	public void register(MicroService m) {
-        fQueuesMicroService.putIfAbsent(m,new LinkedBlockingQueue<>());
+            if(m!=null) {
+                fQueuesMicroService.putIfAbsent(m, new LinkedBlockingQueue<>());
+            }
 	}
 
 
@@ -155,21 +147,30 @@ public class MessageBusImpl implements MessageBus {
      * @param m the micro-service to unregister.
      */
 	@Override
-	public synchronized void unregister(MicroService m) {
-        LinkedBlockingQueue<Future> queueFuture=fMicroServiceAndFuture.get(m);
-        if(queueFuture!=null) {
-            for (Future key : queueFuture) {
-                if(!key.isDone())
-                    key.resolve(null);
-            }
-            fMicroServiceAndFuture.remove(m);
-        }
-            fQueuesMicroService.remove(m);
-        for (Class<?extends Message> key :fMessage.keySet()){
+	public  void unregister(MicroService m) {
+	    if(m!=null){
+        synchronized(lockMessageEvent){
+        for (Class<?extends Message> key :fMessage.keySet()){//remove from the Typs Message hash table
             fMessage.get(key).remove(m);
-        }
-	}
+        }}
+        fQueuesMicroService.remove(m);//remove the micro server with queue of him
+        resolveFurtureToNull(m);// resolve all the future to null
+	}}
 
+    /**
+     * All the future belong to the micro Service calls m ,be resolve if they were not done.
+     * @param m
+     */
+    private void resolveFurtureToNull(MicroService m){
+        LinkedBlockingQueue<Future> queueFuture=fMicroServiceAndFuture.get(m);
+            if(queueFuture!=null) {
+                for (Future key : queueFuture) {
+                    if (!key.isDone())
+                        key.resolve(null);
+                }
+                fMicroServiceAndFuture.remove(m);
+        }
+    }
     /**
      * A Micro-Service calls this method in order to take a message from its allocated queue. This method is blocking
      * (waits until there is an available message and returns it).

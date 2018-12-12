@@ -1,10 +1,11 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
+import bgu.spl.mics.application.accessoores.WriteObjectToFile;
+
 import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static bgu.spl.mics.application.BookStoreRunner.printToFile;
 
 /**
  * Passive object representing the store finance management. 
@@ -62,7 +63,8 @@ public class MoneyRegister implements Serializable {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		printToFile(filename,this.receipts);
+		WriteObjectToFile writeObjectToFile=new WriteObjectToFile();
+		writeObjectToFile.printToFile(filename,this.receipts);
 	}
 }
 
