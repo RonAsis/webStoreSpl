@@ -17,7 +17,7 @@ public class Customer implements Serializable{
 	private String name;//the name of the customer
 	private String address;// the address of the customer
 	private int distance;// the distance of the customer’s address from the store
-	private CopyOnWriteArrayList<OrderReceipt> receipts;//all the receipts issued to the customer
+	private List<OrderReceipt> receipts;//all the receipts issued to the customer
 	private int creditCard;//The number of the credit card of the customer
 	private AtomicInteger availableAmountInCreditCard;//The remaining available amount of money in the credit card of the customer.
 

@@ -37,7 +37,9 @@ public class FutureTest {
 
     @Test
     public void resolve() {
-        ResolveAndGet();
+        this.futureDeliveryVehicle.resolve(new DeliveryVehicle(123,90));
+        this.futureOrderReceipt.resolve(new OrderReceipt());
+        this.futureBookInventoryInfo.resolve(new BookInventoryInfo("Hidden Figures", 10, 99));
     }
     private void ResolveAndGet(){
        resolve();
@@ -45,11 +47,7 @@ public class FutureTest {
         assertNotNull("should not be null", this.futureOrderReceipt.get());
         assertNotNull("should not be null", this.futureBookInventoryInfo.get());
     }
-    private void Resolve(){
-        this.futureDeliveryVehicle.resolve(new DeliveryVehicle(123,90));
-        this.futureOrderReceipt.resolve(new OrderReceipt());
-        this.futureBookInventoryInfo.resolve(new BookInventoryInfo("Hidden Figures", 10, 99));
-    }
+
     @Test
     public void isDone() {
 

@@ -162,7 +162,9 @@ public class MessageBusImpl implements MessageBus {
             fMessage.get(key).remove(m);
         }}
         fQueuesMicroService.remove(m);//remove the micro server with queue of him
-            resolveFurtureToNull(m);// resolve all the future to null
+            synchronized(lockFutures) {
+                resolveFurtureToNull(m);// resolve all the future to null
+            }
 	}}
 
     /**
