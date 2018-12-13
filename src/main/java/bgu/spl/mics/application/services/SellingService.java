@@ -40,7 +40,6 @@ public class SellingService extends MicroService{
 	protected void initialize() {
 		terminateService();
 		orderBook();
-		//System.out.println("Selling service: "+this.getName()+" is initialized");
 	}
 
 	/**
@@ -61,64 +60,59 @@ public class SellingService extends MicroService{
 		this.subscribeEvent(BookOrderEvent.class, details -> {
 			// Initializing the time in which the selling service started processing the order
 			Future<Integer> processTick = sendEvent(new GetTickEvent());
+
 			if (processTick!=null){
 				Integer processTickTime = processTick.get(1, TimeUnit.SECONDS);
-				if (processTickTime!=null) {
 
+				if (processTickTime!=null) {
 					// Saving the price the customer paid for the book, this price is returned from TakeBookEvent
 					Future<Integer> takeBook = sendEvent(new TakeBookEvent(details.getBookName(), details.getCustomer().getAvailableCreditAmount()));
+
 					if (takeBook != null) {
 						Integer price = takeBook.get(1, TimeUnit.SECONDS);
+
+						// If the book was taking successfully,
+						// i.e. the customer can afford the book and there's an available copy of the book
 						if (price != null) {
 							// Initializing a new receipt for this order
 							OrderReceipt receipt = new OrderReceipt();
 
-							// If the book was taking successfully,
-							// i.e. the customer can afford the book and there's an available copy of the book
-							/////**************if (price != null) {
-							// Charging the customer for the book
-							////////////****************this.moneyRegister.chargeCreditCard(details.getCustomer(), price);
-
 							// Initializing the time in which this receipt was issued
 							Future<Integer> issuedTick = sendEvent(new GetTickEvent());
-							if (issuedTick != null) {
-								//System.out.println(details.getCustomer().getName()+" , "+this.moneyRegister);
-								this.moneyRegister.chargeCreditCard(details.getCustomer(), price);
 
+							if (issuedTick != null) {
 								Integer issuedTickTime = issuedTick.get(1, TimeUnit.SECONDS);
 
 								// Setting all of the receipt's details/information
 								if(issuedTickTime!=null){
-								setReceipt(receipt, details, processTickTime, issuedTickTime, price);
-								// Adding the receipt to list of receipts in moneyRegister
-								moneyRegister.file(receipt);
-								complete(details, receipt);
-								// Ordering a delivery of the book
-								sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
-								System.out.println("The customer: " + details.getCustomer().getName() + ", bought the book: " + details.getBookName());
-								//}
-							}}
-							//else {
-							//complete(details, receipt);
-							else {
-								System.out.println("The order " + details.getCustomer().getName() + " made failed.");
-								complete(details, null);
+									// Charging the customer for the book
+									this.moneyRegister.chargeCreditCard(details.getCustomer(), price);
+
+									setReceipt(receipt, details, processTickTime, issuedTickTime, price);
+									// Adding the receipt to list of receipts in moneyRegister
+									moneyRegister.file(receipt);
+									complete(details, receipt);
+
+									// Ordering a delivery of the book
+									sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
+								}
+								else
+									complete(details, null);
 							}
-						} else {
-							System.out.println("Timer killed itself");
-							complete(details, null);
+							else
+								complete(details, null);
 						}
+						else
+							complete(details, null);
 					}
-					else {
-						System.out.println("takebookevent is null");
+					else
 						complete(details, null);
-					}
 				}
-				else{
-					System.out.println("Timer is dead");
+				else
 					complete(details, null);
-				}
 			}
+			else
+				complete(details, null);
 		});
 	}
 

@@ -33,7 +33,6 @@ public class LogisticsService extends MicroService {
 	protected void initialize() {
 		terminateService();
 		sendDelivery();
-		//System.out.println("Logistics service: "+this.getName()+" is initialized");
 	}
 
 	/**

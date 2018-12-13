@@ -1,8 +1,8 @@
 package bgu.spl.mics.application;
 
-import bgu.spl.mics.application.accessoores.ReadJson;
-import bgu.spl.mics.application.accessoores.RunnerTherds;
-import bgu.spl.mics.application.accessoores.WriteObjectToFile;
+import bgu.spl.mics.application.accessoires.ReadJson;
+import bgu.spl.mics.application.accessoires.RunnerTherds;
+import bgu.spl.mics.application.accessoires.WriteObjectToFile;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 

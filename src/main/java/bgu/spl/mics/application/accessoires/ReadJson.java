@@ -1,4 +1,4 @@
-package bgu.spl.mics.application.accessoores;
+package bgu.spl.mics.application.accessoires;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.*;

@@ -32,55 +32,55 @@ public class Customer implements Serializable{
 	}
 
 	/**
-     * Retrieves the name of the customer.
-     */
+	 * Retrieves the name of the customer.
+	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-     * Retrieves the ID of the customer  . 
-     */
+	 * Retrieves the ID of the customer  .
+	 */
 	public int getId() {
 		return id;
 	}
-	
+
 	/**
-     * Retrieves the address of the customer.  
-     */
+	 * Retrieves the address of the customer.
+	 */
 	public String getAddress() {
 		return address;
 	}
-	
+
 	/**
-     * Retrieves the distance of the customer from the store.  
-     */
+	 * Retrieves the distance of the customer from the store.
+	 */
 	public int getDistance() {
 		return distance;
 	}
 
-	
+
 	/**
-     * Retrieves a list of receipts for the purchases this customer has made.
-     * <p>
-     * @return A list of receipts.
-     */
+	 * Retrieves a list of receipts for the purchases this customer has made.
+	 * <p>
+	 * @return A list of receipts.
+	 */
 	public List<OrderReceipt> getCustomerReceiptList() {
 		return receipts;
 	}
-	
+
 	/**
-     * Retrieves the amount of money left on this customers credit card.
-     * <p>
-     * @return Amount of money left.   
-     */
+	 * Retrieves the amount of money left on this customers credit card.
+	 * <p>
+	 * @return Amount of money left.
+	 */
 	public int getAvailableCreditAmount() {
 		return availableAmountInCreditCard.get();
 	}
-	
+
 	/**
-     * Retrieves this customers credit card serial number.    
-     */
+	 * Retrieves this customers credit card serial number.
+	 */
 	public int getCreditNumber() {
 		return creditCard;
 	}
@@ -93,6 +93,8 @@ public class Customer implements Serializable{
 		do{
 			oldValue=this.availableAmountInCreditCard.get();
 			newValue=this.availableAmountInCreditCard.get()-amount;
+			if (newValue<0)
+				break;
 		}while(!this.availableAmountInCreditCard.compareAndSet(oldValue,newValue));
 	}
 }

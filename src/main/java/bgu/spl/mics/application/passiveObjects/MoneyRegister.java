@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
-import bgu.spl.mics.application.accessoores.WriteObjectToFile;
+import bgu.spl.mics.application.accessoires.WriteObjectToFile;
 
 import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;

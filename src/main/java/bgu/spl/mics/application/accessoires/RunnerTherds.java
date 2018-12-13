@@ -1,4 +1,4 @@
-package bgu.spl.mics.application.accessoores;
+package bgu.spl.mics.application.accessoires;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

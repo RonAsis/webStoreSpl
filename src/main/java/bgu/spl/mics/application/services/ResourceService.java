@@ -40,7 +40,6 @@ public class ResourceService extends MicroService{
 	protected void initialize() {
 		terminateService();
 		sendVehicle();
-		//System.out.println("Resources service: "+this.getName()+" is initialized");
 	}
 
 	/**
@@ -60,13 +59,15 @@ public class ResourceService extends MicroService{
 	private void sendVehicle(){
 		this.subscribeEvent(ResourceEvent.class, deliveryMessage-> {
 			Future<DeliveryVehicle> futureDeliveryVehicle =	this.resourcesHolder.acquireVehicle();
-			DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(1, TimeUnit.SECONDS); /// with time or without????
-			if (deliveryVehicle!=null){
-				deliveryVehicle.deliver(deliveryMessage.getDeliveryMessage().getAddress(), deliveryMessage.getDeliveryMessage().getDistance());
-				this.resourcesHolder.releaseVehicle(deliveryVehicle);
+
+			if (futureDeliveryVehicle!=null){
+				DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(1, TimeUnit.SECONDS);
+
+				if (deliveryVehicle!=null){
+					deliveryVehicle.deliver(deliveryMessage.getDeliveryMessage().getAddress(), deliveryMessage.getDeliveryMessage().getDistance());
+					this.resourcesHolder.releaseVehicle(deliveryVehicle);
+				}
 			}
-			//else
-			//	System.out.println("There are no vehicles");
 		});
 	}
 

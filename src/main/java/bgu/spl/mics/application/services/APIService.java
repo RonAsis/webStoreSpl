@@ -46,7 +46,6 @@ public class APIService extends MicroService{
 	protected void initialize() {
 		terminateService();
 		placeOrder();
-		//System.out.println("API service: "+this.getName()+" is initialized");
 	}
 
 	/**
@@ -83,11 +82,7 @@ public class APIService extends MicroService{
 								this.customer.addReceipts(receipt);
 							}
 						}
-						else
-							System.out.println("can not make order, orderTickTime is null");
 					}
-					else
-						System.out.println("can not finish order, timer killed itself");
 				}
 				else if (pair.getTick() > orderBook.getTick()){
 					break; // since orderSchedule is sorted, once the pair's tick is greater than the given tick, there's no need to keep looking for orders

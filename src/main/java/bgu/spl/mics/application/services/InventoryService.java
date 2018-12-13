@@ -37,7 +37,6 @@ public class InventoryService extends MicroService{
 	protected void initialize() {
 		terminateService();
 		takeBook();
-		//System.out.println("Inventory service: "+this.getName()+" is initialized");
 	}
 
 	/**
@@ -58,15 +57,12 @@ public class InventoryService extends MicroService{
 			int price = this.inventory.checkAvailabiltyAndGetPrice(details.getBookName());
 			if (price!=-1 && price <= details.getMoneyLeft()){
 				OrderResult orderResult = this.inventory.take(details.getBookName());
-				if (orderResult.equals(OrderResult.NOT_IN_STOCK)){
-					System.out.println("The book: "+details.getBookName()+" is out of stock");
-				}
-				else
+				if (orderResult.equals(OrderResult.SUCCESSFULLY_TAKEN)){
 					complete(details, price);
+				}
 			}
 			else { // if the customer can't afford the book or if the book is out of stock
 				complete(details, null);
-				System.out.println("the customer can't afford the book or if the book is out of stock");
 			}
 		});
 	}

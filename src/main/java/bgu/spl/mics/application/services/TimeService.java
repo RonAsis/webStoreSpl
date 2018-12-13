@@ -43,7 +43,6 @@ public class TimeService extends MicroService{
         sendTick();
         terminateService();
         completeEvent();
-     //   System.out.println("TimeService is initialized");
         this.timer.start();
     }
 
@@ -53,7 +52,6 @@ public class TimeService extends MicroService{
     private void sendTick(){
         timer = new Timer(this.speed, tickEvent->{
             tick++;
-         //  System.out.println("Tick: "+ this.tick);
             if (this.tick == this.duration) {
                 sendBroadcast(new StopTickBroadcast(tick));
                 this.timer.stop();
