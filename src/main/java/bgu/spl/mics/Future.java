@@ -88,10 +88,12 @@ public class Future<T> {
 	 * @param unit the {@link TimeUnit} time units to wait.
 	 */
 	private void waitGet(long timeout, TimeUnit unit) {
-		try {
-			unit.sleep(timeout);
-		} catch (InterruptedException ignore) {
-			ignore.printStackTrace();
+		while (!isDone) {
+			try {
+				unit.sleep(timeout);
+			} catch (InterruptedException ignore) {
+				ignore.printStackTrace();
+			}
 		}
 	}
 }

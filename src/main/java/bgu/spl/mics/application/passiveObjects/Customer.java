@@ -1,8 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,7 +28,7 @@ public class Customer implements Serializable{
 		this.distance=distance;
 		this.creditCard=creditCard;
 		this.availableAmountInCreditCard=new AtomicInteger();
-		this.receipts=new CopyOnWriteArrayList<>();
+		this.receipts=new LinkedList<>();
 		this.availableAmountInCreditCard.set(availableAmountInCreditCard);
 	}
 
