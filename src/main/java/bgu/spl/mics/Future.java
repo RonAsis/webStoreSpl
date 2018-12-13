@@ -1,7 +1,6 @@
 package bgu.spl.mics;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A Future object represents a promised result - an object that will
@@ -12,14 +11,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * No public constructor is allowed except for the empty constructor.
  */
 public class Future<T> {
-	private AtomicReference<T> result;
+	private T result;
+	private final  Object lockGet=new Object();
 	private boolean isDone;
 
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
 	public Future() {
-		result=new AtomicReference<>();
 		isDone=false;
 	}
 
@@ -31,30 +30,25 @@ public class Future<T> {
 	 * @return return the result of type T if it is available, if not wait until it is available.
 	 *
 	 */
-	public synchronized T get() {
-			while (result==null) {
+	public  synchronized T get() {
+		T ans;
+			while (!this.isDone) {
 				try {
 					wait();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
 				}
+				catch (InterruptedException e){}
 			}
-			T ans=result.get();
-			notifyAll();
+			ans = result;
 			return ans;
 		}
 
 	/**
 	 * Resolves the result of this Future object.
 	 */
-	public void resolve (T result) {
-		T oldResult;
-		T newResult;
-		do{
-			oldResult=this.result.get();
-			newResult=result;
-			isDone=true;
-		}while (!this.result.compareAndSet(oldResult,newResult));
+	public synchronized void resolve (T result) {
+		this.result=result;
+		isDone=true;
+		notify();
 	}
 
 	/**
@@ -78,7 +72,7 @@ public class Future<T> {
 	public T get(long timeout, TimeUnit unit) {
 		if(!isDone())
 			waitGet(timeout,unit);
-		return result.get();
+		return result;
 	}
 
 	/**
@@ -88,12 +82,10 @@ public class Future<T> {
 	 * @param unit the {@link TimeUnit} time units to wait.
 	 */
 	private void waitGet(long timeout, TimeUnit unit) {
-		while (!isDone) {
-			try {
-				unit.sleep(timeout);
-			} catch (InterruptedException ignore) {
-				ignore.printStackTrace();
-			}
+		try {
+			unit.sleep(timeout);
+		} catch (InterruptedException ignore) {
+			ignore.printStackTrace();
 		}
 	}
 }

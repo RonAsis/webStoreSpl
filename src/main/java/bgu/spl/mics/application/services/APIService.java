@@ -76,9 +76,8 @@ public class APIService extends MicroService{
 
 						if (orderTickTime!=null){
 							Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime)); // ordering the book
-
-							if (futureOrder!=null && futureOrder.get(1, TimeUnit.SECONDS)!=null) {
-								OrderReceipt receipt = futureOrder.get(); // adding the receipt to the list of receipts the customer has
+							OrderReceipt receipt = futureOrder.get();
+							if (receipt!=null) {
 								this.customer.addReceipts(receipt);
 							}
 						}
