@@ -32,7 +32,7 @@ public abstract class MicroService implements Runnable {
      */
     public MicroService(String name) {
         this.name = name;
-        this.Callbacks = new HashMap<Class,Callback>();
+        this.Callbacks = new HashMap<>();
     }
 
     /**
