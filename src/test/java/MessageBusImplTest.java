@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 public class MessageBusImplTest {
     private MessageBusImpl fMessageBusImpl;
     private MicroService fMicroService;
+    private ExampleBroadcast broadcas;
     @Before
     public void setUp() throws Exception {
         try {
@@ -41,9 +42,9 @@ public class MessageBusImplTest {
     @Test
     public void subscribeEvent() {
         Event event=registerAndSubscribeEvent();
-
         //Check if can send event after do subscribeEvent
         assertNotNull(fMessageBusImpl.sendEvent(event));
+        this.fMessageBusImpl.unregister(fMicroService);
     }
 
     @Test
@@ -57,6 +58,7 @@ public class MessageBusImplTest {
         Future future=fMessageBusImpl.sendEvent(event);
         fMessageBusImpl.complete(event,"test");
         assertTrue(future.isDone());
+        this.fMessageBusImpl.unregister(fMicroService);
     }
 
     @Test
@@ -67,21 +69,24 @@ public class MessageBusImplTest {
     @Test
     public void sendEvent() {
         Event event=registerAndSubscribeEvent();
-        assertNull(fMessageBusImpl.sendEvent(event));
+        assertNotNull(fMessageBusImpl.sendEvent(event));
+        this.fMessageBusImpl.unregister(fMicroService);
     }
 
     @Test
     public void register() {
         Event event= this.registerAndSubscribeEvent();
-
         // send event so we can check if this is registered need return null if not successful
         assertNotNull(fMessageBusImpl.sendEvent(event));
+        this.fMessageBusImpl.unregister(fMicroService);
     }
 
     @Test
     public void unregister() {
-        Event event=registerAndSubscribeEvent();
-
+        // Event event=registerAndSubscribeEvent();
+        ExampleEvent event= new ExampleEvent("testEvent");
+        fMessageBusImpl.register(fMicroService);
+        fMessageBusImpl.subscribeEvent(event.getClass(),fMicroService);
         // unregisted the micro server
         fMessageBusImpl.unregister(fMicroService);
 
@@ -91,18 +96,7 @@ public class MessageBusImplTest {
 
     @Test
     public void awaitMessage() {
-        Event event =registerAndSubscribeEvent();
-
-        //sent to awaitMessage the method won't waiting for an event to appear
-        fMessageBusImpl.sendEvent(event);
-        boolean subscribeBroadcast = true;
-        try {
-            fMessageBusImpl.awaitMessage(fMicroService);
-        }
-        catch (InterruptedException e){
-            subscribeBroadcast = false;
-        }
-        assertTrue(subscribeBroadcast);
+        testerBroadcast();
     }
     private Event registerAndSubscribeEvent(){
         //** register and subscribe the micro server
@@ -131,6 +125,8 @@ public class MessageBusImplTest {
            subscribeBroadcast = false;
         }
         assertTrue(subscribeBroadcast);
+        this.fMessageBusImpl.unregister(fMicroService);
+
     }
 
 }
