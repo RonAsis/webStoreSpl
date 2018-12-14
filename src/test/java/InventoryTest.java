@@ -39,9 +39,7 @@ public class InventoryTest {
         inventory.load(books); // loading booksInventory with an empty array, the array shouldn't be loaded
         inventory.take("Hidden Figures");
         assertSame(inventory.take("Hidden Figures"), OrderResult.NOT_IN_STOCK);
-
-        books[0]=new BookInventoryInfo("Hidden Figures", 10, 100);
-        books[1]=new BookInventoryInfo("The Help", 20, 90);
+        books[0]=new BookInventoryInfo("Hidden Figures", 1, 100);
         inventory.load(books); // loading booksInventory with an array
         assertSame(inventory.take("Hidden Figures"), OrderResult.SUCCESSFULLY_TAKEN);
     }
@@ -68,7 +66,7 @@ public class InventoryTest {
         assertEquals(inventory.checkAvailabiltyAndGetPrice("Hidden Figures"), -1); // searching for a book in the empty booksInventory
 
         books[0]=new BookInventoryInfo("Hidden Figures", 1, 100);
-        books[1]=new BookInventoryInfo("The Help", 20, 90);
+        books[1]=new BookInventoryInfo("The Help", 1, 90);
         inventory.load(books);
         assertEquals(inventory.checkAvailabiltyAndGetPrice("Hidden Figures"), books[0].getPrice()); // searching for a book in booksInventory
         assertEquals(inventory.checkAvailabiltyAndGetPrice("Hidden Figures 2"), -1); // searching for a book that isn't in the booksInventory
@@ -88,7 +86,7 @@ public class InventoryTest {
         assertEquals(createHashMap(books), readFromFile(output));
 
         String output1 = "Output1";
-        books[0]=new BookInventoryInfo("Hidden Figures", 20, 100);
+        books[0]=new BookInventoryInfo("Hidden Figures", 1, 100);
         books[1]=new BookInventoryInfo("The Help", 1, 90);
         inventory.load(books);
         inventory.printInventoryToFile(output1);
