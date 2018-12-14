@@ -43,8 +43,12 @@ public class Inventory {
 	 * 						of the inventory.
 	 */
 	public void load (BookInventoryInfo[ ] inventory ) {
-		for(BookInventoryInfo bookInventoryInfo:inventory)
-			this.booksInventory.put(bookInventoryInfo.getBookTitle(),bookInventoryInfo);
+		if(inventory!=null) {
+			for (BookInventoryInfo bookInventoryInfo : inventory)
+				if(bookInventoryInfo!=null) {
+					this.booksInventory.put(bookInventoryInfo.getBookTitle(), bookInventoryInfo);
+				}
+		}
 	}
 
 	/**

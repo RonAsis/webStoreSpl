@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Future<T> {
 	private T result;
-	private final  Object lockGet=new Object();
 	private boolean isDone;
 
 	/**
