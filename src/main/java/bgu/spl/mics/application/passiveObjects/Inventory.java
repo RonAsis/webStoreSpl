@@ -105,18 +105,22 @@ public class Inventory {
 	}
 
 	private void createFile(HashMap<String,Integer> hashmap ,String filename){
-		ObjectOutputStream outStream = null;
+		ObjectOutputStream objectOutputStream = null;
+		FileOutputStream fileOutputStream = null;
 		try {
-			outStream = new ObjectOutputStream(new FileOutputStream(filename));
-			outStream.writeObject(hashmap);
+			fileOutputStream = new FileOutputStream(filename);
+			objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			objectOutputStream.writeObject(hashmap);
 		} catch (IOException ioException) {
 			System.err.println("Error opening file.");
 		} catch (NoSuchElementException noSuchElementException) {
 			System.err.println("Invalid input.");
 		} finally {
 			try {
-				if (outStream != null)
-					outStream.close();
+				if (objectOutputStream != null)
+					objectOutputStream.close();
+				if (fileOutputStream!=null)
+					fileOutputStream.close();
 			} catch (IOException ioException) {
 				System.err.println("Error closing file.");
 			}
