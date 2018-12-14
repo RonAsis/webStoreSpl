@@ -17,21 +17,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class MoneyRegister implements Serializable {
-	private CopyOnWriteArrayList<OrderReceipt> receipts;
-	private  int totalEarnings;
+	private CopyOnWriteArrayList<OrderReceipt> receipts; // all of the receipts of the orders that were made
+	private int totalEarnings; // the total amount of earnings
+
 	/**
      * Retrieves the single instance of this class.
      */
 	private static class SingletonHolder {
 		private static MoneyRegister instance = new MoneyRegister();
 	}
+
 	private MoneyRegister() {
 		receipts=new CopyOnWriteArrayList<>();
 		totalEarnings=0;
 	}
+
 	public static MoneyRegister getInstance() {
 		return SingletonHolder.instance;
 	}
+
 	/**
      * Saves an order receipt in the money register.
      * <p>   
@@ -41,6 +45,7 @@ public class MoneyRegister implements Serializable {
 		receipts.add(r);
 		totalEarnings=totalEarnings+r.getPrice();
 	}
+
 	/**
      * Retrieves the current total earnings of the store.  
      */

@@ -95,6 +95,7 @@ public class SellingService extends MicroService{
 
 									// Ordering a delivery of the book
 									sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
+
 								}
 								else
 									complete(details, null);
@@ -129,10 +130,12 @@ public class SellingService extends MicroService{
 		receipt.setBookTitle(details.getBookName());
 		receipt.setCustomerId(details.getCustomer().getId());
 		receipt.setOrderTick(details.getOrderTickTime());
-		receipt.setSeller(this.getName());
+
 		receipt.setProcessTick(processTickTime);
 		receipt.setIssuedTick(issuedTickTime);
 		receipt.setPrice(price);
+
+		receipt.setSeller(this.getName());
 		receipt.setOrderId(this.orderId);
 		this.orderId++;
 	}

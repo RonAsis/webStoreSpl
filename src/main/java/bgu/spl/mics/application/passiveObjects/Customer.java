@@ -21,6 +21,16 @@ public class Customer implements Serializable{
 	private int creditCard;//The number of the credit card of the customer
 	private AtomicInteger availableAmountInCreditCard;//The remaining available amount of money in the credit card of the customer.
 
+	/**
+	 * Customer's constructor.
+	 *
+	 * @param id - the id of the customer.
+	 * @param name - the name of the customer.
+	 * @param address - the address of the customer.
+	 * @param distance - the distance from the customer's address to the store.
+	 * @param creditCard - the number of the customer's credit card.
+	 * @param availableAmountInCreditCard - the remaining available amount of money in the customer's credit card.
+	 */
 	public Customer(int id,String name, String address,int distance,int creditCard,int availableAmountInCreditCard){
 		this.id=id;
 		this.name=name;
@@ -60,7 +70,6 @@ public class Customer implements Serializable{
 		return distance;
 	}
 
-
 	/**
 	 * Retrieves a list of receipts for the purchases this customer has made.
 	 * <p>
@@ -85,17 +94,28 @@ public class Customer implements Serializable{
 	public int getCreditNumber() {
 		return creditCard;
 	}
+
+	/**
+	 * Adds the given receipt to the list of receipts.
+	 * @param receipt - the receipt that needs to be added to list of receipts.
+	 */
+
 	public void addReceipts(Object receipt){
 		receipts.add((OrderReceipt)receipt);
 	}
+
+	/**
+	 * Charges the customer's credit card with the given amount.
+	 * @param amount- the amount that needs to be charged.
+	 */
 	public void chargeCredit(int amount){
 		Integer oldValue;
 		Integer newValue;
-		do{
+		do {
 			oldValue=this.availableAmountInCreditCard.get();
 			newValue=this.availableAmountInCreditCard.get()-amount;
 			if (newValue<0)
 				break;
-		}while(!this.availableAmountInCreditCard.compareAndSet(oldValue,newValue));
+		} while(!this.availableAmountInCreditCard.compareAndSet(oldValue,newValue));
 	}
 }

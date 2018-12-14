@@ -17,16 +17,21 @@ public class MessageBusImpl implements MessageBus {
     private ConcurrentHashMap<MicroService,LinkedBlockingQueue<Future>> fMicroServiceAndFuture;
     private final Object lockMessageEvent=new Object();
     private final  Object lockFutures=new Object();
-    /**for Safe Singleton of this class**/
+
+    /**
+     * for Safe Singleton of this class
+     **/
 	private static class SingletonHolder {
 			private static MessageBusImpl instance = new MessageBusImpl();
 		}
+
 		private MessageBusImpl() {
             fQueuesMicroService= new ConcurrentHashMap<>();
             fMessage= new ConcurrentHashMap<>();
             fFutureOfEvents= new ConcurrentHashMap<>();
             fMicroServiceAndFuture=new ConcurrentHashMap<>();
 		}
+
 		public static MessageBusImpl getInstance() {
 			return SingletonHolder.instance;
 		}
@@ -47,10 +52,12 @@ public class MessageBusImpl implements MessageBus {
             }
         }
     }
-	private void subscribe(Class<? extends Message> type, MicroService m){
+
+    private void subscribe(Class<? extends Message> type, MicroService m){
         fMessage.get(type).add(m);
         }
-    /**
+
+        /**
      * A Micro-Service calls this method in order to subscribe itself for some type of broadcast Message(t he specific class type of the event is passed as
      * a parameter)
      * @param type 	The type to subscribe to.
@@ -63,6 +70,7 @@ public class MessageBusImpl implements MessageBus {
             subscribe(type, m);
         }
     }
+
     /**
      * Micro-Service calls this method in order to notify the Message-Bus that the event was handled, and providing the result of handling the request. The Future object associated with event e
      * should be resolved to the result given as a parameter
@@ -77,6 +85,7 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
     }
+
     /**
      * A Micro-Service calls this method in order to add a broadcast message to the queues of all Micro-Services which subscribed to receive this specific message type
      * @param b 	The message to added to the queues.
@@ -85,7 +94,8 @@ public class MessageBusImpl implements MessageBus {
 	public void sendBroadcast(Broadcast b) {
                     doSendBroadcat(b);
 	}
-    private void doSendBroadcat(Broadcast b) {
+
+	private void doSendBroadcat(Broadcast b) {
         LinkedBlockingQueue<MicroService> queue = fMessage.get(b.getClass());
         if(queue!=null) {
             Iterator it=queue.iterator();
@@ -95,6 +105,7 @@ public class MessageBusImpl implements MessageBus {
             }
         }
     }
+
     /**
      * A Micro-Service calls this method in order to add the event e to the message queue of one of the Micro-Services
      * which have subscribed to receive events of type e.getClass().
@@ -110,6 +121,7 @@ public class MessageBusImpl implements MessageBus {
                     }
             }
 	}
+
 	private <T> Future<T>  doSendEvent (Event<T> e){
         MicroService ms;
             if ((ms = addEventToQueneOfMicroServer(e)) != null) {
@@ -117,6 +129,7 @@ public class MessageBusImpl implements MessageBus {
             }
             return null;
     }
+
     private <T> MicroService  addEventToQueneOfMicroServer(Event<T> e){
         LinkedBlockingQueue< MicroService > queueOfEvent;
         MicroService ms;
@@ -131,6 +144,7 @@ public class MessageBusImpl implements MessageBus {
 	    }
         return null;
     }
+
     private  <T> Future<T> createFutrueEvent(Event<T> e,MicroService ms){
 	    Future <T> future=new Future<>();
         fMicroServiceAndFuture.get(ms).add(future);
@@ -148,7 +162,6 @@ public class MessageBusImpl implements MessageBus {
                 fQueuesMicroService.putIfAbsent(m, new LinkedBlockingQueue<>());
             }
 	}
-
 
     /**
      * A Micro-Service calls this method in order to unregister itself.Should remove the message queue allocated to the Micro-Service and clean all the references related to this Message-Bus
@@ -181,6 +194,7 @@ public class MessageBusImpl implements MessageBus {
                 fMicroServiceAndFuture.remove(m);
         }
     }
+
     /**
      * A Micro-Service calls this method in order to take a message from its allocated queue. This method is blocking
      * (waits until there is an available message and returns it).

@@ -5,15 +5,14 @@ import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.application.services.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ReadJson {
-    private  ConcurrentLinkedQueue< Thread > threads;
-    private  HashMap<Integer,Customer> customerHashMap;
+    private ConcurrentLinkedQueue< Thread > threads;
+    private HashMap<Integer,Customer> customerHashMap;
 
     public ReadJson(String path){
         customerHashMap=new HashMap<>();
@@ -35,10 +34,12 @@ public class ReadJson {
     public HashMap<Integer,Customer> getCustomerHashMap(){
         return this.customerHashMap;
     }
+
     public ConcurrentLinkedQueue< Thread > getThreads(){
         return this.threads;
     }
-    private  void initialInventory(Object objecetInventory){
+
+    private void initialInventory(Object objecetInventory){
         Inventory inventory=Inventory.getInstance();
         ArrayList<Map<String,Object>> mapInventory=(ArrayList<Map<String,Object>>)objecetInventory;
         BookInventoryInfo[] bookInventoryInfos=new BookInventoryInfo[mapInventory.size()];
@@ -54,7 +55,7 @@ public class ReadJson {
         inventory.load(bookInventoryInfos);
     }
 
-    private  void initialResources(Object objectResuorces){
+    private void initialResources(Object objectResuorces){
         ResourcesHolder resourcesHolder=ResourcesHolder.getInstance();
         ArrayList<Map<String,Object>> mapResources=(ArrayList<Map<String,Object>>)objectResuorces;
         Map<String,Object> map=mapResources.get(0);
@@ -71,7 +72,8 @@ public class ReadJson {
         }
         resourcesHolder.load(vehicles);
     }
-    private  void services(Object objectServices){
+
+    private void services(Object objectServices){
         LinkedHashMap<String, LinkedHashMap<String,Object>> mapServices= ( LinkedHashMap<String,LinkedHashMap<String,Object>>)objectServices;
         sellingService(mapServices.get("selling"));
         inventoryService(mapServices.get("inventoryService"));
@@ -80,44 +82,50 @@ public class ReadJson {
         customers(mapServices.get("customers"));
         TimeService(mapServices.get("time"));
     }
-    private  void addThread(MicroService microService){
+
+    private void addThread(MicroService microService){
         Thread tempThread=new Thread(microService);
         threads.add(tempThread);
     }
 
-    private  void TimeService(LinkedHashMap<String,Object> mapTime){
+    private void TimeService(LinkedHashMap<String,Object> mapTime){
         MicroService microService=new TimeService((Integer)mapTime.get("speed"),(Integer)mapTime.get("duration"));
         addThread(microService);
     }
-    private  void sellingService(Object object){
+
+    private void sellingService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
             MicroService microService=new SellingService("selling "+i);
             addThread(microService);
         }
     }
-    private   void inventoryService(Object object){
+
+    private void inventoryService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
             MicroService microService=new InventoryService( "inventoryService "+i);
             addThread(microService);
         }
     }
-    private   void logisticsService(Object object){
+
+    private void logisticsService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
             MicroService microService=new LogisticsService( "logistic "+i);
             addThread(microService);
         }
     }
-    private  void resourcesService(Object object){
+
+    private void resourcesService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
             MicroService microService=new ResourceService( "resource "+i);
             addThread(microService);
         }
     }
-    private  void customers(Object object){
+
+    private void customers(Object object){
         ArrayList arrayList=(ArrayList)object;
         Iterator it= arrayList.iterator();
         int numberName=1;

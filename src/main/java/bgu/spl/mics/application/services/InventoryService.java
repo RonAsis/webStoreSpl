@@ -55,11 +55,15 @@ public class InventoryService extends MicroService{
 	private void takeBook(){
 		this.subscribeEvent(TakeBookEvent.class, details -> {
 			int price = this.inventory.checkAvailabiltyAndGetPrice(details.getBookName());
+
 			if (price!=-1 && price <= details.getMoneyLeft()){
 				OrderResult orderResult = this.inventory.take(details.getBookName());
+
 				if (orderResult.equals(OrderResult.SUCCESSFULLY_TAKEN)){
 					complete(details, price);
 				}
+				else // if the book is out of stock
+					complete(details, null);
 			}
 			else { // if the customer can't afford the book or if the book is out of stock
 				complete(details, null);

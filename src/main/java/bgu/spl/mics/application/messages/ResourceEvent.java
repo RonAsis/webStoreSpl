@@ -2,7 +2,7 @@ package bgu.spl.mics.application.messages;
 import bgu.spl.mics.Event;
 
 /**
- * An event that is sent when a book needs to be delivered to a customer.
+ * An event that is sent when a vehicle needs to deliver a book to a customer.
  * LogisticsService sends this event, ResourceService responds.
  */
 public class ResourceEvent implements Event {

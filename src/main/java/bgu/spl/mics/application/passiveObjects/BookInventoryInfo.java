@@ -9,16 +9,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  * You may add fields and methods to this class as you see fit (including public methods).
  */
 public class BookInventoryInfo {
-	private String fBookTitle;// the title of the book
-	private AtomicInteger fAmountInInventory;//numbers of book from this type
-	private int fPrice;//the price of the book
+	private String fBookTitle; // the title of the book
+	private AtomicInteger fAmountInInventory; // number of books from this type in the inventory
+	private int fPrice; // the price of the book
 
+	/**
+	 * BookInventoryInfo's constructor.
+	 *
+	 * @param bookTitle - the title of the book.
+	 * @param amountInInventory - number of books from this type in the inventory.
+	 * @param price - the price of the book.
+	 */
 	public  BookInventoryInfo(String bookTitle,Integer amountInInventory, Integer price){
 		this.fBookTitle=bookTitle;
 		this.fAmountInInventory=new AtomicInteger();
 		this.fAmountInInventory.set(amountInInventory);
 		this.fPrice=price;
 	}
+
+	/**
+	 * Reduces by the number of books from this type in the inventory -
+	 * if possible, returns true, if not, returns false.
+	 *
+	 * @return whether or not it was possible to reduce "fAmountInInventory" by one.
+	 */
 	public boolean lessAmountBook(){
 		Integer oldValue;
 		Integer newValue;
@@ -31,6 +45,7 @@ public class BookInventoryInfo {
 		}while(!fAmountInInventory.compareAndSet(oldValue,newValue));
 		return true;
 	}
+
 	/**
 	 * Retrieves the title of this book.
 	 * <p>
@@ -57,8 +72,4 @@ public class BookInventoryInfo {
 	public int getPrice() {
 		return fPrice;
 	}
-
-
-
-
 }

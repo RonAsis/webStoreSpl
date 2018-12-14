@@ -50,8 +50,8 @@ public class LogisticsService extends MicroService {
 	 */
 	private void sendDelivery(){
 		this.subscribeEvent(DeliveryEvent.class, deliveryMessage -> {
-			DeliveryEvent d = new DeliveryEvent(deliveryMessage.getOrderReceipt(), deliveryMessage.getAddress(), deliveryMessage.getDistance());
-			sendEvent(new ResourceEvent(d));
+			ResourceEvent resourceMessage = new ResourceEvent(deliveryMessage);
+			sendEvent(resourceMessage);
 		});
 	}
 }

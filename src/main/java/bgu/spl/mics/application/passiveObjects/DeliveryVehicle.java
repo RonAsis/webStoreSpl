@@ -7,8 +7,9 @@ package bgu.spl.mics.application.passiveObjects;
  * You may add ONLY private fields and methods to this class.
  */
 public class DeliveryVehicle {
-	private int license;//the vehicle license number
-	private int speed;//number of milliseconds needed for 1KM
+	private int license; // the vehicle license number
+	private int speed; // number of milliseconds needed for 1KM
+
 	/**
      * Constructor.   
      */
@@ -16,6 +17,7 @@ public class DeliveryVehicle {
 		this.license=license;
 		this.speed=speed;
 	  }
+
 	/**
      * Retrieves the license of this delivery vehicle.   
      */

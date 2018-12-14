@@ -31,15 +31,15 @@ public class Future<T> {
 	 */
 	public  synchronized T get() {
 		T ans;
-			while (!this.isDone) {
-				try {
-					wait();
-				}
-				catch (InterruptedException e){}
+		while (!this.isDone) {
+			try {
+				wait();
 			}
-			ans = result;
-			return ans;
+			catch (InterruptedException e){}
 		}
+		ans = result;
+		return ans;
+	}
 
 	/**
 	 * Resolves the result of this Future object.
@@ -81,10 +81,13 @@ public class Future<T> {
 	 * @param unit the {@link TimeUnit} time units to wait.
 	 */
 	private void waitGet(long timeout, TimeUnit unit) {
-		try {
-			unit.sleep(timeout);
-		} catch (InterruptedException ignore) {
-			ignore.printStackTrace();
-		}
+		int counter=0;
+		while ((!isDone && counter<=timeout))
+			try {
+				unit.sleep(1);
+				counter++;
+			} catch (InterruptedException ignore) {
+				ignore.printStackTrace();
+			}
 	}
 }

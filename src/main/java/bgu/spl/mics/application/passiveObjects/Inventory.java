@@ -1,6 +1,4 @@
 package bgu.spl.mics.application.passiveObjects;
-
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -29,12 +27,15 @@ public class Inventory {
 	private static class SingletonHolder {
 		private static Inventory instance = new Inventory();
 	}
+
 	private Inventory() {
 		booksInventory=new ConcurrentHashMap<String,BookInventoryInfo>();
 	}
+
 	public static Inventory getInstance() {
 		return SingletonHolder.instance;
 	}
+
 	/**
 	 * Initializes the store inventory. This method adds all the items given to the store
 	 * inventory.
@@ -72,6 +73,7 @@ public class Inventory {
 		}
 		return OrderResult.NOT_IN_STOCK;
 	}
+
 	/**
 	 * Checks if a certain book is available in the inventory.
 	 * <p>
@@ -81,6 +83,7 @@ public class Inventory {
 	public int checkAvailabiltyAndGetPrice(String book) {
 		return  bookPrice(booksInventory.get(book));
 	}
+
 	private int bookPrice(BookInventoryInfo book){
 		if (book!=null&& book.getAmountInInventory()>0)
 			return book.getPrice();
@@ -100,6 +103,7 @@ public class Inventory {
 		createFile(createHashMap(),filename);
 
 	}
+
 	private void createFile(HashMap<String,Integer> hashmap ,String filename){
 		ObjectOutputStream outStream = null;
 		try {
@@ -118,6 +122,7 @@ public class Inventory {
 			}
 		}
 	}
+
 	private HashMap<String,Integer> createHashMap(){
 		HashMap<String, Integer> hmap = new HashMap<String, Integer>();
 		for(String key: booksInventory.keySet())
