@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -45,27 +44,28 @@ public class TimeService extends MicroService{
     }
 
     /**
+     * This method makes sure that the TimeService terminates itself
+     * when the last tick is received.
+     */
+    private void terminateService(){
+        this.subscribeBroadcast(TickBroadcast.class, tickBroadcast->{
+            if (tickBroadcast.getLastTick() == true)
+                this.terminate();
+        });
+    }
+
+    /**
      * This method makes sure that TimeService responds to tickEvent.
      */
     private void sendTick(){
         timer = new Timer(this.speed, tickEvent->{
             tick++;
             if (this.tick == this.duration) {
-                sendBroadcast(new StopTickBroadcast(tick));
+                sendBroadcast(new TickBroadcast(tick, true));
                 this.timer.stop();
             }
             else
-                sendBroadcast(new TickBroadcast(tick));
-        });
-    }
-
-    /**
-     * This method makes sure that the TimeService terminates itself
-     * when StopTickBroadcast is received.
-     */
-    private void terminateService(){
-        this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-            this.terminate();
+                sendBroadcast(new TickBroadcast(tick, false));
         });
     }
 }

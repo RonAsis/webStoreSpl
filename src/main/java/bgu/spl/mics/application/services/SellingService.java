@@ -39,29 +39,24 @@ public class SellingService extends MicroService{
 	 * This method initializes the sellingService.
 	 */
 	protected void initialize() {
-		terminateService();
 		changeTick();
 		orderBook();
 	}
 
 	/**
-	 * This method makes sure that the sellingService terminates itself
-	 * when StopTickBroadcast is received.
+	 * This method makes sure that the sellingService changes its tick and terminates itself
+	 * when the last tick is received.
 	 */
-	private void terminateService(){
-		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-			this.terminate();
-		});
-	}
-
 	private void changeTick() {
 		this.subscribeBroadcast(TickBroadcast.class, changeTick-> {
 			this.tick = changeTick.getTick();
+			if (changeTick.getLastTick() == true)
+				this.terminate();
 		});
 	}
+
 	/**
-	 * This method makes sure that the sellingService terminates itself
-	 * when StopTickBroadcast is received.
+	 * This method makes sure that the sellingService responds to a given BookOrderEvent.
 	 */
 	private void orderBook() {
 		this.subscribeEvent(BookOrderEvent.class, details -> {

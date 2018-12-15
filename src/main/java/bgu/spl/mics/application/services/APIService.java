@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 import bgu.spl.mics.Future;
-import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.MicroService;
@@ -42,45 +41,38 @@ public class APIService extends MicroService{
 	 * This method initializes the APIService.
 	 */
 	protected void initialize() {
-		terminateService();
 		placeOrder();
 	}
 
 	/**
-	 * This method makes sure that the APIService terminates itself
-	 * when StopTickBroadcast is received.
-	 */
-	private void terminateService(){
-		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-			this.terminate();
-		});
-	}
-
-	/**
 	 * This method places all of the orders that need to be
-	 * made when TickBroadcast is received.
+	 * made when TickBroadcast is received, if the received tick isn't the last one.
+	 * If the received tick is the last tick, APIService terminates itself.
 	 *
 	 * The orders that need to be made, are those where the pair's tick (/the order's tick)
 	 * is equal to the given tick from the broadcast.
 	 */
 	private void placeOrder(){
 		this.subscribeBroadcast(TickBroadcast.class, orderBook-> {
-			for (Pair pair : orderSchedule) {
-				if (pair.getTick() == orderBook.getTick()){
-					Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, pair.getTick())); // ordering the book
+			if (orderBook.getLastTick() == false)
+				for (Pair pair : orderSchedule) {
+					if (pair.getTick() == orderBook.getTick()){
+						Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, pair.getTick())); // ordering the book
 
-					if (futureOrder!=null) {
-						OrderReceipt receipt = futureOrder.get();
+						if (futureOrder!=null) {
+							OrderReceipt receipt = futureOrder.get();
 
-						if (receipt != null) {
-							this.customer.addReceipts(receipt);
+							if (receipt != null) {
+								this.customer.addReceipts(receipt);
+							}
 						}
 					}
+					else if (pair.getTick() > orderBook.getTick()){
+						break; // since orderSchedule is sorted, once the pair's tick is greater than the given tick, there's no need to keep looking for orders
+					}
 				}
-				else if (pair.getTick() > orderBook.getTick()){
-					break; // since orderSchedule is sorted, once the pair's tick is greater than the given tick, there's no need to keep looking for orders
-				}
-			}
+			else
+				this.terminate();
 		});
 	}
 

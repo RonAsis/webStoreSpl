@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.messages.TakeBookEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.OrderResult;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
@@ -41,11 +41,12 @@ public class InventoryService extends MicroService{
 
 	/**
 	 * This method makes sure that the InventoryService terminates itself
-	 * when StopTickBroadcast is received.
+	 * when the las tick is received.
 	 */
 	private void terminateService(){
-		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-			this.terminate();
+		this.subscribeBroadcast(TickBroadcast.class, tickBroadcast->{
+			if (tickBroadcast.getLastTick() == true)
+				this.terminate();
 		});
 	}
 

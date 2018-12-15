@@ -3,7 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.ResourceEvent;
-import bgu.spl.mics.application.messages.StopTickBroadcast;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.Inventory;
@@ -37,11 +37,12 @@ public class LogisticsService extends MicroService {
 
 	/**
 	 * This method makes sure that the LogisticsService terminates itself
-	 * when StopTickBroadcast is received.
+	 * when the last tick is received.
 	 */
 	private void terminateService(){
-		this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
-			this.terminate();
+		this.subscribeBroadcast(TickBroadcast.class, tickBroadcast->{
+			if (tickBroadcast.getLastTick() == true)
+				this.terminate();
 		});
 	}
 

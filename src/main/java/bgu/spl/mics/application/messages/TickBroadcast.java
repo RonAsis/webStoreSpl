@@ -7,14 +7,15 @@ import bgu.spl.mics.Broadcast;
  */
 public class TickBroadcast implements Broadcast {
     private  int tick; // the current tick
-
+    private boolean lastTick;
     /**
      * TickBroadcast's constructor.
      *
      * @param tick - the current tick.
      */
-    public TickBroadcast(int tick) {
-        this.tick=tick;
+    public TickBroadcast(int tick, boolean lastTick) {
+        this.tick = tick;
+        this.lastTick = lastTick;
     }
 
     /**
@@ -23,4 +24,6 @@ public class TickBroadcast implements Broadcast {
     public int getTick() {
         return tick;
     }
+
+    public boolean getLastTick(){ return this.lastTick; }
 }
