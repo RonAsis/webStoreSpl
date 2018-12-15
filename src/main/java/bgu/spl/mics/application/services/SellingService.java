@@ -2,13 +2,14 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.messages.BookOrderEvent;
+import bgu.spl.mics.application.messages.DeliveryEvent;
+import bgu.spl.mics.application.messages.TakeBookEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
-import bgu.spl.mics.application.passiveObjects.Inventory;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Selling service in charge of taking orders from customers.
@@ -64,7 +65,7 @@ public class SellingService extends MicroService{
 			Future<Integer> takeBook = sendEvent(new TakeBookEvent(details.getBookName(), details.getCustomer().getAvailableCreditAmount()));
 
 			if (takeBook != null) {
-				Integer price = takeBook.get(1, TimeUnit.SECONDS);
+				Integer price = takeBook.get();
 
 				// If the book was taking successfully,
 				// i.e. the customer can afford the book and there's an available copy of the book

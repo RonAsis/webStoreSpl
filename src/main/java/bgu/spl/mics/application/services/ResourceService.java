@@ -5,11 +5,9 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.ResourceEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
-import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
-
-import java.util.concurrent.TimeUnit;
+import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 
 /**
  * ResourceService is in charge of the store resources - the delivery vehicles.
@@ -60,7 +58,7 @@ public class ResourceService extends MicroService{
 			Future<DeliveryVehicle> futureDeliveryVehicle =	this.resourcesHolder.acquireVehicle();
 
 			if (futureDeliveryVehicle!=null){
-				DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get(1, TimeUnit.SECONDS);
+				DeliveryVehicle deliveryVehicle = futureDeliveryVehicle.get();
 
 				if (deliveryVehicle!=null){
 					deliveryVehicle.deliver(deliveryMessage.getDeliveryMessage().getAddress(), deliveryMessage.getDeliveryMessage().getDistance());
