@@ -33,6 +33,7 @@ public class BookStoreRunner {
             System.out.println("amount of orders "+or.size());
             HashMap<Integer, Customer> customerHashMap=(HashMap<Integer, Customer>)getReceipts(args[1]);
             HashMap<String,BookInventoryInfo> booksInventory=(HashMap<String,BookInventoryInfo>)getReceipts(args[2]);
+           MoneyRegister moneyRegister=(MoneyRegister)getReceipts(args[4]);
             System.out.println("amount of orders "+or.size());
         } catch (IOException e) {
             e.printStackTrace();
