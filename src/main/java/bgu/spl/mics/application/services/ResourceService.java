@@ -2,7 +2,6 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.ResourceEvent;
 import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;

@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class SellingService extends MicroService{
 	private MoneyRegister moneyRegister;
 	private int orderId=1; // in order to keep truck of the receipts' ids
+	private int tick;
 
 	/**
 	 * SellingService's constructor.
@@ -39,6 +40,7 @@ public class SellingService extends MicroService{
 	 */
 	protected void initialize() {
 		terminateService();
+		changeTick();
 		orderBook();
 	}
 
@@ -52,62 +54,41 @@ public class SellingService extends MicroService{
 		});
 	}
 
+	private void changeTick() {
+		this.subscribeBroadcast(TickBroadcast.class, changeTick-> {
+			this.tick = changeTick.getTick();
+		});
+	}
 	/**
 	 * This method makes sure that the sellingService terminates itself
 	 * when StopTickBroadcast is received.
 	 */
 	private void orderBook() {
 		this.subscribeEvent(BookOrderEvent.class, details -> {
-			// Initializing the time in which the selling service started processing the order
-			Future<Integer> processTick = sendEvent(new GetTickEvent());
+			// Saving the price the customer paid for the book, this price is returned from TakeBookEvent
+			Future<Integer> takeBook = sendEvent(new TakeBookEvent(details.getBookName(), details.getCustomer().getAvailableCreditAmount()));
 
-			if (processTick!=null){
-				Integer processTickTime = processTick.get(1, TimeUnit.SECONDS);
+			if (takeBook != null) {
+				Integer price = takeBook.get(1, TimeUnit.SECONDS);
 
-				if (processTickTime!=null) {
-					// Saving the price the customer paid for the book, this price is returned from TakeBookEvent
-					Future<Integer> takeBook = sendEvent(new TakeBookEvent(details.getBookName(), details.getCustomer().getAvailableCreditAmount()));
+				// If the book was taking successfully,
+				// i.e. the customer can afford the book and there's an available copy of the book
+				if (price != null) {
+					// Charging the customer for the book
+					this.moneyRegister.chargeCreditCard(details.getCustomer(), price);
 
-					if (takeBook != null) {
-						Integer price = takeBook.get(1, TimeUnit.SECONDS);
+					// Initializing a new receipt for this order
+					OrderReceipt receipt = new OrderReceipt();
 
-						// If the book was taking successfully,
-						// i.e. the customer can afford the book and there's an available copy of the book
-						if (price != null) {
-							// Initializing a new receipt for this order
-							OrderReceipt receipt = new OrderReceipt();
+					// Setting all of the receipt's details/information
+					setReceipt(receipt, details, price);
 
-							// Initializing the time in which this receipt was issued
-							Future<Integer> issuedTick = sendEvent(new GetTickEvent());
+					// Adding the receipt to list of receipts in moneyRegister
+					moneyRegister.file(receipt);
+					complete(details, receipt);
 
-							if (issuedTick != null) {
-								Integer issuedTickTime = issuedTick.get(1, TimeUnit.SECONDS);
-
-								// Setting all of the receipt's details/information
-								if(issuedTickTime!=null){
-									// Charging the customer for the book
-									this.moneyRegister.chargeCreditCard(details.getCustomer(), price);
-
-									setReceipt(receipt, details, processTickTime, issuedTickTime, price);
-									// Adding the receipt to list of receipts in moneyRegister
-									moneyRegister.file(receipt);
-									complete(details, receipt);
-
-									// Ordering a delivery of the book
-									sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
-
-								}
-								else
-									complete(details, null);
-							}
-							else
-								complete(details, null);
-						}
-						else
-							complete(details, null);
-					}
-					else
-						complete(details, null);
+					// Ordering a delivery of the book
+					sendEvent(new DeliveryEvent(receipt, details.getCustomer().getAddress(), details.getCustomer().getDistance()));
 				}
 				else
 					complete(details, null);
@@ -122,20 +103,18 @@ public class SellingService extends MicroService{
 	 *
 	 * @param receipt - the receipt that is being set.
 	 * @param details - a BookOrderEvent.
-	 * @param processTickTime - the time in which the selling service started processing the order.
-	 * @param issuedTickTime - the time in which this receipt was issued.
 	 * @param price - the price of the book that was bought.
 	 */
-	private void setReceipt(OrderReceipt receipt, BookOrderEvent details, int processTickTime, int issuedTickTime, int price){
+	private void setReceipt(OrderReceipt receipt, BookOrderEvent details, int price){
 		receipt.setBookTitle(details.getBookName());
 		receipt.setCustomerId(details.getCustomer().getId());
 		receipt.setOrderTick(details.getOrderTickTime());
 
-		receipt.setProcessTick(processTickTime);
-		receipt.setIssuedTick(issuedTickTime);
 		receipt.setPrice(price);
 
 		receipt.setSeller(this.getName());
+		receipt.setProcessTick(this.tick);
+		receipt.setIssuedTick(this.tick);
 		receipt.setOrderId(this.orderId);
 		this.orderId++;
 	}

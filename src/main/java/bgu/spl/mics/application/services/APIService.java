@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 import bgu.spl.mics.Future;
-import bgu.spl.mics.application.messages.GetTickEvent;
 import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.*;
@@ -9,7 +8,6 @@ import bgu.spl.mics.application.messages.BookOrderEvent;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -66,24 +64,16 @@ public class APIService extends MicroService{
 	 * is equal to the given tick from the broadcast.
 	 */
 	private void placeOrder(){
-		subscribeBroadcast(TickBroadcast.class, orderBook-> {
+		this.subscribeBroadcast(TickBroadcast.class, orderBook-> {
 			for (Pair pair : orderSchedule) {
 				if (pair.getTick() == orderBook.getTick()){
-					Future<Integer> orderTick = sendEvent(new GetTickEvent());
+					Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, pair.getTick())); // ordering the book
 
-					if (orderTick!=null){
-						Integer orderTickTime = orderTick.get(1, TimeUnit.SECONDS);
+					if (futureOrder!=null) {
+						OrderReceipt receipt = futureOrder.get();
 
-						if (orderTickTime!=null){
-							Future<OrderReceipt> futureOrder = sendEvent(new BookOrderEvent(pair.getName(), this.customer, orderTickTime)); // ordering the book
-
-							if (futureOrder!=null) {
-								OrderReceipt receipt = futureOrder.get();
-
-								if (receipt != null) {
-									this.customer.addReceipts(receipt);
-								}
-							}
+						if (receipt != null) {
+							this.customer.addReceipts(receipt);
 						}
 					}
 				}

@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.GetTickEvent;
 import bgu.spl.mics.application.messages.StopTickBroadcast;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
@@ -42,7 +41,6 @@ public class TimeService extends MicroService{
     protected void initialize() {
         sendTick();
         terminateService();
-        completeEvent();
         this.timer.start();
     }
 
@@ -68,15 +66,6 @@ public class TimeService extends MicroService{
     private void terminateService(){
         this.subscribeBroadcast(StopTickBroadcast.class, terminateTick->{
             this.terminate();
-        });
-    }
-
-    /**
-     * This method makes sure that TimeService responds to GetTickEvent.
-     */
-    private void completeEvent(){
-        this.subscribeEvent(GetTickEvent.class, e->{
-            complete(e, this.tick); // returns the current tick
         });
     }
 }
