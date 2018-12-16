@@ -8,6 +8,11 @@ public class WriteObjectToFile {
 
     public WriteObjectToFile(){ }
 
+    /**
+     * write the Object into file calls nameFile
+     * @param nameFile
+     * @param object
+     */
     public  void printToFile(String nameFile,Object object){
         try {
             FileOutputStream fos = new FileOutputStream(nameFile);

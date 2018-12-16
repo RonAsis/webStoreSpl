@@ -11,9 +11,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ReadJson {
-    private ConcurrentLinkedQueue< Thread > threads;
-    private HashMap<Integer,Customer> customerHashMap;
+    private ConcurrentLinkedQueue< Thread > threads;//for start all the thread the same time and when end play the timer. Also for do Join all
+    private HashMap<Integer,Customer> customerHashMap;//for print in the end of the program the HashMap<Integer,Customer> to file
 
+    /**
+     * constructor read the input.json that get the path of him and start to initial all the Object in the program
+     * @param path
+     */
     public ReadJson(String path){
         customerHashMap=new HashMap<>();
         threads=new ConcurrentLinkedQueue<>();
@@ -31,14 +35,24 @@ public class ReadJson {
         }
     }
 
+    /**
+     * @return HashMap<Integer,Customer>
+     */
     public HashMap<Integer,Customer> getCustomerHashMap(){
         return this.customerHashMap;
     }
 
+    /**
+     * @return ConcurrentLinkedQueue< Thread >
+     */
     public ConcurrentLinkedQueue< Thread > getThreads(){
         return this.threads;
     }
 
+    /**
+     * initial the Inventory
+     * @param objecetInventory contain the Inventory
+     */
     private void initialInventory(Object objecetInventory){
         Inventory inventory=Inventory.getInstance();
         ArrayList<Map<String,Object>> mapInventory=(ArrayList<Map<String,Object>>)objecetInventory;
@@ -55,6 +69,10 @@ public class ReadJson {
         inventory.load(bookInventoryInfos);
     }
 
+    /**
+     * initial the resources
+     * @param objectResuorces
+     */
     private void initialResources(Object objectResuorces){
         ResourcesHolder resourcesHolder=ResourcesHolder.getInstance();
         ArrayList<Map<String,Object>> mapResources=(ArrayList<Map<String,Object>>)objectResuorces;
@@ -73,6 +91,10 @@ public class ReadJson {
         resourcesHolder.load(vehicles);
     }
 
+    /**
+     * initial the services
+     * @param objectServices
+     */
     private void services(Object objectServices){
         LinkedHashMap<String, LinkedHashMap<String,Object>> mapServices= ( LinkedHashMap<String,LinkedHashMap<String,Object>>)objectServices;
         sellingService(mapServices.get("selling"));
@@ -83,16 +105,28 @@ public class ReadJson {
         TimeService(mapServices.get("time"));
     }
 
+    /**
+     * create new Thread of MicroService and add him to threads
+     * @param microService
+     */
     private void addThread(MicroService microService){
         Thread tempThread=new Thread(microService);
         threads.add(tempThread);
     }
 
+    /**
+     * Create the thread for the time service
+     * @param mapTime
+     */
     private void TimeService(LinkedHashMap<String,Object> mapTime){
         MicroService microService=new TimeService((Integer)mapTime.get("speed"),(Integer)mapTime.get("duration"));
         addThread(microService);
     }
 
+    /**
+     * create the server of sellingService
+     * @param object
+     */
     private void sellingService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
@@ -101,6 +135,10 @@ public class ReadJson {
         }
     }
 
+    /**
+     * create the server of inventoryService
+     * @param object
+     */
     private void inventoryService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
@@ -108,7 +146,10 @@ public class ReadJson {
             addThread(microService);
         }
     }
-
+    /**
+     * create the server of logisticsService
+     * @param object
+     */
     private void logisticsService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
@@ -116,7 +157,10 @@ public class ReadJson {
             addThread(microService);
         }
     }
-
+    /**
+     * create the server of resourcesService
+     * @param object
+     */
     private void resourcesService(Object object){
         int size=(Integer)object;
         for (int i =1;i<=size;i++){
@@ -125,6 +169,10 @@ public class ReadJson {
         }
     }
 
+    /**
+     * create the object of Customer and add him
+     * @param object
+     */
     private void customers(Object object){
         ArrayList arrayList=(ArrayList)object;
         Iterator it= arrayList.iterator();
